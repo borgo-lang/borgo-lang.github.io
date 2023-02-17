@@ -21423,8 +21423,8 @@
   Borgo.main = async function() {
     resetLogs();
     initExamples();
-    const textarea = document.getElementById("code");
-    const initial_content = textarea.value;
+    const editor = document.getElementById("editor");
+    const initial_content = editor.getElementsByTagName("textarea")[0].value;
     const wordHover = hoverTooltip((view2, pos, side) => {
       const line = view2.state.doc.lineAt(pos);
       const user_source = view2.state.doc.toString();
@@ -21458,8 +21458,8 @@
         //  wordHover,
       ]
     });
-    textarea.insertAdjacentElement("afterend", view.dom);
-    textarea.remove();
+    editor.insertAdjacentElement("afterend", view.dom);
+    editor.remove();
     Borgo.view = view;
     Borgo.log = function(s) {
       updateLog(s);
