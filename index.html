@@ -1,17 +1,19 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8"/>
-    <style>
+<head>
+  <title>The Borgo Programming Language</title>
+  <meta charset="utf-8">
+  <style>
       body { max-width: 60em; margin: 0 auto; }
       pre { padding: 1em; border: 1px solid #ddd; }
-    </style>
-  </head>
-  <body>
-    <h1 id="the-borgo-programming-language">The Borgo Programming Language</h1>
+  </style>
+</head>
+<body>
+  <h1 id="the-borgo-programming-language">The Borgo Programming Language</h1>
 <p><strong>Borgo</strong> is a Rusty functional language that compiles to Go.</p>
 <p>The Borgo compiler is written in Rust. Check out the
-<strong><a href="TODO">online playground</a></strong> for some examples.</p>
+<strong><a href="https://borgo-lang.github.io/playground/">online playground</a></strong> for some
+examples.</p>
 <ul>
 <li><a href="#goals">Goals</a></li>
 <li><a href="#tour">Language Tour</a></li>
@@ -236,11 +238,11 @@ fn borgo_main() {
 <p>Requirements:</p>
 <ul>
 <li>Rust toolchain</li>
-<li>Go compiler</li>
+<li>Go toolchain</li>
 <li>Deno (if you want to run tests)</li>
 </ul>
 <p>Run this script to build the compiler and set up a fresh project:</p>
-<pre><code class="language-bash">$ bash init-project PROJECT_NAME
+<pre><code class="language-bash">$ ./init-project PROJECT_NAME
 
 $ ls PROJECT_NAME
 app.brg   # write source code here
@@ -264,10 +266,7 @@ std       # stdlib
 <li><code>examples</code> - run all the examples in the playground</li>
 </ul>
 <p>Omitting <code>TEST_SUITE</code> will run all tests.</p>
-
-
-    <a href="/playground">Examples and Playground</a>
-    <br />
-    <a href="https://github.com/borgo-lang/borgo">Github repo</a>
-  </body>
+ <a href="/playground">Examples and Playground</a><br>
+  <a href="https://github.com/borgo-lang/borgo">Github repo</a>
+</body>
 </html>
