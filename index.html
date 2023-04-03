@@ -27,7 +27,7 @@ Rust.</p>
 <p><strong>Garbage collected</strong> - Optimize for developer experience over extreme
 performance. Leverage Go&#39;s garbage collector.</p>
 <p><strong>Functional</strong> - Algebraic data types, exhaustive pattern matching, immutable
-values and persistent collections. No loops, no imperative constructs.</p>
+values and persistent collections.</p>
 <p><strong><code>Result&lt;T, E&gt;</code> error handling and <code>?</code> operator</strong> - Just like in Rust.</p>
 <p><strong>Uniform Function Call Syntax</strong> - All functions can be used as methods, by
 dispatching on the type of the first argument.</p>
@@ -124,6 +124,24 @@ like <code>to_list</code>, <code>to_map</code> etc. turn a <code>Seq&lt;T&gt;</c
     .take(200)
     .reduce(0, |acc, n| if n % 2 == 0 { acc + n } else { acc })
 </code></pre>
+<p>Elements in a sequence can be iterated with for loops.</p>
+<pre><code class="language-rust">let xs = [1,2,3];
+
+for x in xs.seq() {
+
+}
+
+for (index, x) in xs.seq().enumerate() {
+
+}
+</code></pre>
+<p>Infinite loops are also available.</p>
+<pre><code class="language-rust">loop {
+    if some_condition {
+        break;
+    }
+}
+</code></pre>
 <p>There is no <code>null</code> value, use <code>Option&lt;T&gt;</code> instead. Error handling works much
 like Rust, with <code>Result&lt;T&gt;</code> and the <code>?</code> operator.</p>
 <pre><code class="language-rust">enum Error {
@@ -172,31 +190,18 @@ let b = (&quot;bar&quot;, 2);
 
 (a.1 + b.1).assert_eq(3)
 </code></pre>
-<p>Mutability can still be achieved with <code>Ref&lt;T&gt;</code> (a mutable reference to a value
-of type <code>T</code>).</p>
-<pre><code class="language-rust">fn add_to_list(xs: Ref&lt;List&lt;Int&gt;&gt;, n: Int) {
-    if n == 0 {
-        return;
+<p>Mutability can still be achieved with mutable variables.</p>
+<pre><code class="language-rust">fn count&lt;T&gt;(xs: Seq&lt;T&gt;) -&gt; Int {
+    let mut n = 0;
+
+    for _ in xs {
+        n = n + 1;
     }
 
-    // Mutate the list
-    xs.mutate(|prev| prev.push(n));
-
-    add_to_list(xs, n - 1)
+    n
 }
 
-fn borgo_main() {
-    // Create a Ref
-    let xs = [].to_ref();
-
-    // Add 10 elements to the list
-    add_to_list(xs, 10);
-
-    // Get the inner value inside the Ref
-    let inner = xs.get();
-
-    inner.assert_eq([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
-}
+count([1, 2, 3].seq()).assert_eq(3);
 </code></pre>
 <h2 id="stdlib">Stdlib</h2>
 <p>Primitive types</p>

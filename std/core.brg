@@ -124,15 +124,6 @@ extern "native/Debug" {
     fn assert_eq<T>(a: T, b: T);
 }
 
-enum Loop<State, Return> {
-    Done(Return),
-    Recur(State),
-}
-
-extern "native/Loop" {
-    fn start<State, Return>(initial: State, f: fn(state: State) -> Loop<State, Return>) -> Return;
-}
-
 enum Seq<T> {
     Nil,
     Cons(T, fn() -> Seq<T>),
@@ -157,11 +148,12 @@ impl<T> Seq<T> {
         self.filter_map(|x| if f(x) { Some(x) } else { None })
     }
 
-    fn reduce<Y>(self, initial: Y, f: fn(acc: Y, item: T) -> Y) -> Y {
-        Loop::start((initial, self), |(acc, rest)| match rest {
-            Seq::Nil => Loop::Done(acc),
-            Seq::Cons(x, cont) => Loop::Recur((f(acc, x), cont())),
-        })
+    fn reduce<Y>(self, mut acc: Y, f: fn(acc: Y, item: T) -> Y) -> Y {
+        for x in self {
+            acc = f(acc, x)
+        }
+
+        return acc;
     }
 
     fn to_list(self) -> List<T> {
@@ -245,19 +237,26 @@ impl<T> Seq<T> {
         Seq::Cons(current, || Seq::windows(self.drop(1), n))
     }
 
-    fn split_at(self, n: Int) -> (Seq<T>, Seq<T>) {
-        Loop::start((self, Seq::Nil, n), |(remaining, first_part, count)| {
-            if count <= 0 {
-                return Loop::Done((first_part, remaining));
+    fn split_at(self, mut n: Int) -> (Seq<T>, Seq<T>) {
+        let mut first = [];
+        let mut remaining = self;
+
+        loop {
+            if n <= 0 {
+                break;
             }
 
             match remaining {
-                Seq::Nil => Loop::Done((first_part, Seq::Nil)),
-                Seq::Cons(x, next) => {
-                    Loop::Recur((next(), first_part.chain(Seq::once(x)), count - 1))
+                Seq::Nil => break,
+                Seq::Cons(x, cont) => {
+                    n = n - 1;
+                    first = first.push(x);
+                    remaining = cont();
                 }
             }
-        })
+        }
+
+        (first.seq(), remaining)
     }
 
     fn take(self, n: Int) -> Seq<T> {
@@ -265,35 +264,20 @@ impl<T> Seq<T> {
     }
 
     fn drop(self, n: Int) -> Seq<T> {
-        // Just call split_at ?
-        // self.split_at(n).1;
-
-        Loop::start((self, n), |(seq, remaining)| {
-            if remaining <= 0 {
-                return Loop::Done(seq);
-            }
-
-            match seq {
-                Seq::Nil => Loop::Done(Seq::Nil),
-                Seq::Cons(_, cont) => Loop::Recur((cont(), remaining - 1)),
-            }
-        })
+        self.split_at(n).1
     }
 
     fn find_map<Y>(self, f: fn(x: T) -> Option<Y>) -> Option<Y> {
-        Loop::start(self, |seq| match seq {
-            Seq::Nil => Loop::Done(None),
+        let mut ret = None;
 
-            Seq::Cons(x, cont) => {
-                let result = f(x);
-
-                if result.is_some() {
-                    return Loop::Done(result);
-                }
-
-                Loop::Recur(cont())
+        for x in self {
+            ret = f(x);
+            if ret.is_some() {
+                break;
             }
-        })
+        }
+
+        return ret;
     }
 
     fn once(x: T) -> Seq<T> {
