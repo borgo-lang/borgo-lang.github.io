@@ -125,13 +125,11 @@ like <code>to_list</code>, <code>to_map</code> etc. turn a <code>Seq&lt;T&gt;</c
     .reduce(0, |acc, n| if n % 2 == 0 { acc + n } else { acc })
 </code></pre>
 <p>Elements in a sequence can be iterated with for loops.</p>
-<pre><code class="language-rust">let xs = [1,2,3];
-
-for x in xs.seq() {
+<pre><code class="language-rust">for x in numbers.seq() {
 
 }
 
-for (index, x) in xs.seq().enumerate() {
+for (index, x) in numbers.seq().enumerate() {
 
 }
 </code></pre>
