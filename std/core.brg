@@ -1,10 +1,42 @@
+use fmt;
+use reflect;
+
+type Map<K, V> = ();
+
+type EnumerateSlice<T> = ();
+
+type VarArgs<T> = ();
+
+type Channel<T> = ();
+type Sender<T> = ();
+type Receiver<T> = ();
+
+
 enum Result<T, E> {
     Ok(T),
     Err(E),
 }
 
-extern "native/Result" {
-    fn unwrap<T, E>(self: Result<T, E>) -> T;
+impl<T, E> Result<T, E> {
+    fn IsOk(self) -> bool {
+        match self {
+            Ok(_) => true,
+            Err(_) => false,
+        }
+    }
+
+    fn unwrap(self) -> T {
+        rawgo!(
+            "
+      if self.tag == Result_Err {
+        inspect(self.Err)
+        panic(\"Unwrapped Err value\")
+      }
+
+      return self.Ok
+    "
+        )
+    }
 }
 
 enum Option<T> {
@@ -12,34 +44,16 @@ enum Option<T> {
     None,
 }
 
-extern "native/Option" {
-    fn unwrap<T>(self: Option<T>) -> T;
-}
-
 impl<T> Option<T> {
-    fn is_some(self) -> Bool {
+    fn IsSome(self) -> bool {
         match self {
             Some(_) => true,
             None => false,
         }
     }
 
-    fn is_none(self) -> Bool {
-        !self.is_some()
-    }
-
-    fn map<Y>(self, f: fn(x: T) -> Y) -> Option<Y> {
-        match self {
-            None => None,
-            Some(x) => Some(f(x)),
-        }
-    }
-
-    fn and_then<Y>(self, f: fn(x: T) -> Option<Y>) -> Option<Y> {
-        match self {
-            None => None,
-            Some(x) => f(x),
-        }
+    fn IsNone(self) -> bool {
+        !self.IsSome()
     }
 
     fn unwrap_or(self, def: T) -> T {
@@ -56,10 +70,23 @@ impl<T> Option<T> {
         }
     }
 
-    fn ok_or<E>(self, e: E) -> Result<T, E> {
-        match self {
-            Some(x) => Ok(x),
-            None => Err(e),
+    fn unwrap(self) -> T {
+        rawgo!(
+            "
+        if self.tag == Option_None {
+          panic(\"Unwrapped None value\")
+        }
+
+        return self.Some
+      "
+        )
+    }
+
+    fn ToOption<T>(value: T, check: bool) -> Option<T> {
+        if check {
+            Some(value)
+        } else {
+            None
         }
     }
 }
@@ -75,471 +102,290 @@ struct Tuple3<T, Y, Z> {
     third: Z,
 }
 
-extern "native/List" {
-    fn len<T>(xs: List<T>) -> Int;
-    fn push<T>(xs: List<T>, x: T) -> List<T>;
-    fn pop<T>(xs: List<T>) -> List<T>;
-    fn get<T>(xs: List<T>, index: Int) -> Option<T>;
-    fn seq<T>(xs: List<T>) -> Seq<T>;
+fn zero_value<T>() -> T {
+    rawgo!(
+        "
+    var m T
+    return m
+  "
+    )
 }
 
-impl<T> List<T> {
-    fn is_empty(self) -> Bool {
-        self.len() == 0
-    }
-
-    fn to_string<T: to_string>(self) -> String {
-        let body = self
-            .seq()
-            .reduce([], |acc, item| acc.push(item.to_string()));
-
-        "[".append(body.seq().join(", ")).append("]")
+fn assert_eq<T>(a: T, b: T) {
+    if !reflect.DeepEqual(a, b) {
+        inspect(a);
+        inspect(b);
+        rawgo!("panic(\"something wrong\")")
     }
 }
 
-extern "native/String" {
-    fn len(s: String) -> Int;
-    fn append(s: String, other: String) -> String;
-    fn split(s: String, sep: String) -> Seq<String>;
-    fn slice(s: String, start: Int, end: Int) -> String;
-    fn chars(s: String) -> Seq<Char>;
-    fn contains(s: String, needle: String) -> Bool;
-    fn starts_with(s: String, needle: String) -> Bool;
-    fn ends_with(s: String, needle: String) -> Bool;
-    fn index_of(s: String, needle: String) -> Option<Int>;
-    fn parse_int(s: String) -> Option<Int>;
-    fn parse_float(s: String) -> Option<Float>;
+fn inspect<T>(a: T) -> T {
+    fmt.Printf("%+v\n", a);
+    a
 }
 
-impl String {
-    fn is_empty(self) -> Bool {
-        self.len() == 0
-    }
+fn Debug_unreachable<T>() -> T {
+    rawgo!("panic(\"unreachable code\")")
 }
 
-extern "native/Debug" {
-    fn inspect<T: to_string>(x: T) -> T;
-    fn unreachable();
-    fn todo();
-    fn assert_eq<T>(a: T, b: T);
+fn to_result(e: error) -> Result<()> {
+  rawgo!("if e != nil {
+    return struct{}{}, e
+  }
+  return struct{}{}, nil
+  ")
 }
 
-enum Seq<T> {
-    Nil,
-    Cons(T, fn() -> Seq<T>),
-}
-
-impl<T> Seq<T> {
-    fn map<Y>(self, f: fn(x: T) -> Y) -> Seq<Y> {
-        match self {
-            Seq::Nil => Seq::Nil,
-            Seq::Cons(x, cont) => Seq::Cons(f(x), || Seq::map(cont(), f)),
-        }
+impl<T> [T] {
+    fn len(self) -> int {
+        rawgo!("return len(self)")
     }
 
-    fn filter_map<Y>(self, f: fn(x: T) -> Option<Y>) -> Seq<Y> {
-        self.reduce(Seq::Nil, |acc, item| match f(item) {
-            Some(x) => acc.append(Seq::once(x)),
-            None => acc,
-        })
+    fn enumerate(self) -> EnumerateSlice<T> {
+        rawgo!("return self")
     }
 
-    fn filter(self, f: fn(x: T) -> Bool) -> Seq<T> {
-        self.filter_map(|x| if f(x) { Some(x) } else { None })
+    fn set(&mut self, index: int, item: T) {
+        rawgo!("self[index] = item")
     }
 
-    fn reduce<Y>(self, mut acc: Y, f: fn(acc: Y, item: T) -> Y) -> Y {
-        for x in self {
-            acc = f(acc, x)
-        }
-
-        return acc;
+    fn append(&mut self, item: T) -> [T] {
+        rawgo!("return append(self, item)")
     }
 
-    fn to_list(self) -> List<T> {
-        self.reduce([], |acc, item| acc.push(item))
-    }
-
-    fn len(self) -> Int {
-        self.reduce(0, |acc, _| acc + 1)
-    }
-
-    fn first(self) -> Option<T> {
-        match self {
-            Seq::Nil => None,
-            Seq::Cons(x, _) => Some(x),
-        }
-    }
-
-    fn last(self) -> Option<T> {
-        self.reduce(None, |_, item| Some(item))
-    }
-
-    fn get(self, n: Int) -> Option<T> {
-        self.drop(n).first()
-    }
-
-    fn cycle(self) -> Seq<T> {
-        match self {
-            Seq::Nil => Seq::Nil,
-            Seq::Cons(first, cont) => Seq::Cons(first, || Seq::append(cont(), Seq::cycle(self))),
-        }
-    }
-
-    fn append(self, other: Seq<T>) -> Seq<T> {
-        match self {
-            Seq::Nil => other,
-            Seq::Cons(first, cont) => Seq::Cons(first, || Seq::append(cont(), other)),
-        }
-    }
-
-    fn infinite(start: T, f: fn(prev: T) -> T) -> Seq<T> {
-        Seq::Cons(start, || Seq::infinite(f(start), f))
-    }
-
-    fn zip<Y>(self, other: Seq<Y>) -> Seq<(T, Y)> {
-        match (self, other) {
-            (Seq::Nil, _) => Seq::Nil,
-            (_, Seq::Nil) => Seq::Nil,
-
-            (Seq::Cons(x, cont_x), Seq::Cons(y, cont_y)) => {
-                Seq::Cons((x, y), || Seq::zip(cont_x(), cont_y()))
-            }
-        }
-    }
-
-    fn enumerate(self) -> Seq<(Int, T)> {
-        Seq::infinite(0, |n| n + 1).zip(self)
-    }
-
-    fn reverse(self) -> Seq<T> {
-        self.reduce(Seq::Nil, |acc, item| Seq::Cons(item, || acc))
-    }
-
-    fn chunks(self, n: Int) -> Seq<Seq<T>> {
-        let parts = self.split_at(n);
-
-        match parts.0 {
-            Seq::Nil => Seq::Nil,
-            Seq::Cons(_, _) => Seq::Cons(parts.0, || Seq::chunks(parts.1, n)),
-        }
-    }
-
-    // same as chunks, but elements overlap
-    fn windows(self, n: Int) -> Seq<Seq<T>> {
-        let current = self.take(n);
-
-        // if shorter than desired size, drop the last elements
-        if current.len() < n {
-            return Seq::Nil;
-        }
-
-        Seq::Cons(current, || Seq::windows(self.drop(1), n))
-    }
-
-    fn split_at(self, mut n: Int) -> (Seq<T>, Seq<T>) {
-        let mut first = [];
-        let mut remaining = self;
-
-        loop {
-            if n <= 0 {
-                break;
+    fn get(self, i: int) -> Option<T> {
+        rawgo!(
+            "
+            if i < 0 || i >= len(self) {
+              return *new(T), false
             }
 
-            match remaining {
-                Seq::Nil => break,
-                Seq::Cons(x, cont) => {
-                    n = n - 1;
-                    first = first.push(x);
-                    remaining = cont();
-                }
-            }
-        }
-
-        (first.seq(), remaining)
-    }
-
-    fn take(self, n: Int) -> Seq<T> {
-        self.split_at(n).0;
-    }
-
-    fn drop(self, n: Int) -> Seq<T> {
-        self.split_at(n).1
-    }
-
-    fn find_map<Y>(self, f: fn(x: T) -> Option<Y>) -> Option<Y> {
-        let mut ret = None;
-
-        for x in self {
-            ret = f(x);
-            if ret.is_some() {
-                break;
-            }
-        }
-
-        return ret;
-    }
-
-    fn once(x: T) -> Seq<T> {
-        Seq::Cons(x, || Seq::Nil)
-    }
-
-    fn chain(self, other: Seq<T>) -> Seq<T> {
-        match self {
-            Seq::Nil => other,
-            Seq::Cons(x, cont) => Seq::Cons(x, || cont().chain(other)),
-        }
-    }
-
-    fn for_each(self, f: fn(x: T) -> ()) {
-        self.reduce((), |_, item| f(item))
-    }
-
-    fn max_by(self, f: fn(x: T, y: T) -> Ordering) -> Option<T> {
-        self.reduce(None, |acc, item| {
-            if acc.is_none() {
-                return Some(item);
-            }
-
-            if f(item, acc.unwrap()) == Ordering::Greater {
-                return Some(item);
-            }
-
-            return acc;
-        })
-    }
-
-    fn interleave(self, sep: T) -> Seq<T> {
-        self.reduce([], |acc, x| acc.push(sep).push(x))
-            .seq()
-            .drop(1)
-    }
-
-    fn to_string<T: to_string>(self) -> String {
-        // Realize the first N elements
-        self.take(30).to_list().to_string()
+      return self[i], true
+    "
+        )
     }
 }
 
-struct Map<K, V> {}
-
-extern "native/Map" {
-    fn new<K, V>() -> Map<K, V>;
-    fn insert<K: to_hash, V>(m: Map<K, V>, key: K, value: V) -> Map<K, V>;
-    fn get<K, V>(m: Map<K, V>, key: K) -> Option<V>;
-    fn seq<K, V>(m: Map<K, V>) -> Seq<(K, V)>;
-    fn delete<K, V>(m: Map<K, V>, key: K) -> Map<K, V>;
-    fn len<K, V>(m: Map<K, V>) -> Int;
-}
-
-impl<K, V> Map<K, V> {
-    fn seq_keys(self) -> Seq<K> {
-        self.seq().map(|(k, _)| k)
+impl<K: comparable, V> Map<K, V> {
+    fn new() -> Map<K, V> {
+        rawgo!("return map[K]V{}")
     }
 
-    fn seq_values(self) -> Seq<V> {
-        self.seq().map(|(_, v)| v)
+    fn len(self) -> int {
+        rawgo!("return len(self)")
     }
 
-    fn update<K: to_hash>(self, key: K, def: V, f: fn(existing: V) -> V) -> Map<K, V> {
-        let existing = self.get(key).unwrap_or(def);
-        let updated = f(existing);
-        self.insert(key, updated)
+    fn insert(self, k: K, v: V) {
+        rawgo!("self[k] = v")
     }
 
-    fn to_string<K: to_string, V: to_string>(self) -> String {
-        let body = self.seq().reduce([], |acc, item| {
-            let key = item.0.to_string();
-            let val = item.1.to_string();
-            acc.push(key.append(" => ").append(val))
-        });
-
-        "{ ".append(body.seq().join(", ")).append(" }")
+    fn get(self, k: K) -> Option<V> {
+        rawgo!("
+        v, ok := self[k]
+        return v, ok
+        ")
     }
-}
-
-fn to_map<K: to_hash, V>(s: Seq<(K, V)>) -> Map<K, V> {
-    s.reduce(Map::new(), |acc, item| acc.insert(item.0, item.1))
-}
-
-struct Set<K> {
-    m: Map<K, Bool>,
-}
-
-impl<K> Set<K> {
-    fn new() -> Set<K> {
-        Set { m: Map::new() }
-    }
-
-    fn insert<K: to_hash>(self, k: K) -> Set<K> {
-        Set {
-            m: self.m.insert(k, true),
-        }
-    }
-
-    fn delete<K>(self, k: K) -> Set<K> {
-        Set {
-            m: self.m.delete(k),
-        }
-    }
-
-    fn contains<K>(self, k: K) -> Bool {
-        self.m.get(k).is_some()
-    }
-
-    fn len(self) -> Int {
-        self.m.len()
-    }
-
-    fn to_string<K: to_string>(self) -> String {
-        self.m.seq_keys().to_list().to_string()
-    }
-}
-
-fn to_set<K: to_hash>(s: Seq<K>) -> Set<K> {
-    s.reduce(Set::new(), |acc, item| acc.insert(item))
-}
-
-struct Ref<T> {}
-
-extern "effect/Ref" {
-    fn ref_new<T>(value: T) -> Ref<T>;
-    fn ref_set<T>(r: Ref<T>, value: T);
-    fn ref_get<T>(r: Ref<T>) -> T;
-}
-
-impl<T> Ref<T> {
-    fn to_ref<T>(value: T) -> Ref<T> {
-        ref_new(value);
-    }
-
-    fn get(r: Ref<T>) -> T {
-        ref_get(r)
-    }
-
-    fn mutate(r: Ref<T>, f: fn(value: T) -> T) {
-        let current = ref_get(r);
-        ref_set(r, f(current));
-    }
-
-    fn to_string<T: to_string>(self) -> String {
-        "<ref> ".append(self.get().to_string())
-    }
-}
-
-struct Channel<T> {}
-struct Receiver<T> {}
-struct Sender<T> {}
-
-extern "effect/Channel" {
-    fn channel_new<T>() -> Channel<T>;
-    fn channel_recv<T>(self: Receiver<T>) -> Option<T>;
-    fn channel_send<T>(self: Sender<T>, value: T);
 }
 
 impl<T> Channel<T> {
-    fn new() -> (Sender<T>, Receiver<T>) {
-        let ch = channel_new();
-        (Internal::unsafe_coerce(ch), Internal::unsafe_coerce(ch))
-    }
-}
-
-impl<T> Receiver<T> {
-    fn recv(self) -> Option<T> {
-        channel_recv(self)
-    }
+  fn new() -> (Sender<T>, Receiver<T>) {
+    rawgo!("
+    ch := make(chan T)
+    return Tuple2[chan<- T, <-chan T]{ first: ch, second: ch }
+    ")
+  }
 }
 
 impl<T> Sender<T> {
-    // TODO this needs a return type?
-    fn send(self, value: T) {
-        channel_send(self, value)
+  fn send(&mut self, value: T) {
+    rawgo!("self <- value")
+  }
+
+  fn close(&mut self) {
+    rawgo!("close(self)")
+  }
+}
+
+impl<T> Receiver<T> {
+  fn recv(&self) -> T {
+    rawgo!("return <- self")
+  }
+}
+
+#[package(path = __global, name = __global)]
+mod global {
+    trait ComplexType {}
+    trait FloatType {}
+    trait IntegerType {}
+    trait any {}
+    type bool = ();
+    type byte = ();
+    trait comparable {}
+    type complex128 = ();
+    type complex64 = ();
+    type string = (); // TODO move in appropriate place
+    trait error {
+        fn Error() -> string;
+    }
+    type float32 = ();
+    type float64 = ();
+    type int = ();
+    type int16 = ();
+    type int32 = ();
+    type int64 = ();
+    type int8 = ();
+    type rune = ();
+    type uint = ();
+    type uint16 = ();
+    type uint32 = ();
+    type uint64 = ();
+    type uint8 = ();
+    type uintptr = ();
+
+    extern "C" {
+        fn string(bytes: [byte]) -> string;
     }
 }
 
-enum ChannelOp<T> {
-    Recv(Receiver<T>, Option<T>),
-    Send(Sender<T>, T),
+#[package(path = io/fs, name = io::fs)]
+mod fs {
+  struct FileMode {}
+
+  trait FileInfo {
+  	fn Name() -> string;
+    fn Size() -> int64 ;
+    fn Mode() -> FileMode;
+    // fn ModTime() -> time.Time;
+    fn IsDir() -> bool;
+    fn Sys() -> any;
+  }
+
+  extern {
+    fn IsRegular(m: FileMode) -> bool;
+  }
 }
 
-struct Internal {}
-
-extern "native/Internal" {
-    fn unsafe_coerce<T, Y>(x: T) -> Y;
-}
-
-impl Int {
-    fn abs(n: Int) -> Int {
-        if n < 0 {
-            return -n;
-        }
-
-        n
-    }
-
-    fn cmp(a: Int, b: Int) -> Ordering {
-        if a == b {
-            Ordering::Equal
-        } else if a > b {
-            Ordering::Greater
-        } else {
-            Ordering::Less
-        }
+#[package(path = errors, name = errors)]
+mod errors {
+    extern "C" {
+        fn New(text: string) -> error;
     }
 }
 
-enum Ordering {
-    Less,
-    Equal,
-    Greater,
-}
+#[package(path = io, name = io)]
+mod io {
+    trait Writer {
+        fn Write(bytes: [byte]) -> Result<int>;
+    }
+    trait Reader {
+        fn Read(p: [byte]) -> Result<int>;
+    }
 
-extern "native/Char" {
-    fn to_int(self: Char) -> Int;
-    fn to_unquoted_string(self: Char) -> String;
-}
+    trait ReadWriter: Reader + Writer {}
 
-impl Seq<Int> {
-    fn sum(self) -> Int {
-        self.reduce(0, |a, b| a + b)
+    extern {
+      fn Copy(dst: &mut Writer, src: &Reader) -> Result<int64>;
     }
 }
 
-impl Seq<String> {
-    fn join(self, sep: String) -> String {
-        self.interleave(sep)
-            .reduce("", |acc, item| acc.append(item))
+#[package(path = fmt, name = fmt)]
+mod fmt {
+    use io;
+    extern "C" {
+        fn Printf(format: string, a: VarArgs<any>);
+        fn Fprintf(w: io::Writer, format: string, a: VarArgs<any>) -> Result<int>;
+        fn Errorf(format: string, a: VarArgs<any>) -> error;
+        fn Println(a: VarArgs<any>);
     }
 }
 
-extern "overload" {
-    fn equals<T>(x: T, y: T) -> Bool;
-    fn to_hash<T>(x: T) -> Int;
-    fn to_string<T>(x: T) -> String;
-}
 
-impl Unit {
-    fn to_string(self) -> String {
-        "()"
+
+
+#[package(path = net/http, name = net::http)]
+mod http {
+    struct Request {}
+
+    trait ResponseWriter {
+        fn Write(bytes: [byte]) -> Result<int>;
+    }
+
+    trait Handler {
+        fn ServeHTTP(w: ResponseWriter, r: &Request);
+    }
+
+    extern "C" {
+        fn Handle(pattern: string, handler: Handler);
+        fn ListenAndServe(addr: string, handler: Handler);
     }
 }
 
-impl<T, Y> Tuple2<T, Y> {
-    fn to_string<T: to_string, Y: to_string>(self) -> String {
-        "(".append(self.first.to_string())
-            .append(", ")
-            .append(self.second.to_string())
-            .append(")")
+#[package(path = log, name = log)]
+mod log {
+    extern "C" {
+        fn Fatalf(format: string, a: VarArgs<any>);
     }
 }
 
-impl<T, Y, Z> Tuple3<T, Y, Z> {
-    fn to_string<T: to_string, Y: to_string, Z: to_string>(self) -> String {
-        "(".append(self.first.to_string())
-            .append(", ")
-            .append(self.second.to_string())
-            .append(", ")
-            .append(self.third.to_string())
-            .append(")")
+#[package(path = math, name = math)]
+mod math {
+  const Pi: float64 = 0;
+}
+
+#[package(path = math/rand, name = math::rand)]
+mod rand {
+    extern "C" {
+        fn Int() -> int;
+        fn Float64() -> float64;
     }
 }
+
+#[package(path = os, name = os)]
+mod os {
+    // TODO fix when type aliases work
+    // struct FileInfo {}
+
+    struct File {}
+
+    use io::fs;
+
+    extern "C" {
+        fn Close(f: &mut File) -> error;
+        fn Create(name: string) -> Result<&mut File>;
+        fn LookupEnv(key: string) -> Option<string>;
+        fn Open(name: string) -> Result<&mut File>;
+        fn ReadFile(path: string) -> Result<[byte]>;
+        fn Stat(name: string) -> Result<fs::FileInfo>;
+        fn Write(f: &mut File, b: [byte]) -> Result<int>;
+        fn Read(f: &File, b: [byte]) -> Result<int>;
+    }
+}
+
+#[package(path = reflect, name = reflect)]
+mod reflect {
+    extern "C" {
+        fn DeepEqual<T, Y>(a: T, b: Y) -> bool;
+    }
+}
+
+#[package(path = strings, name = strings)]
+mod strings {
+    extern "C" {
+        fn HasPrefix(s: string, prefix: string) -> bool;
+    }
+}
+
+#[package(path = sync, name = sync)]
+mod sync {
+    struct Mutex {}
+    struct WaitGroup {}
+
+    extern "C" {
+        fn Lock(m: &mut Mutex);
+        fn Unlock(m: &mut Mutex);
+        fn Add(wg: &mut WaitGroup, delta: int);
+        fn Done(wg: &mut WaitGroup);
+        fn Wait(wg: &mut WaitGroup);
+    }
+}
+

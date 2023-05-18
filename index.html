@@ -1,275 +1,44 @@
 <!DOCTYPE html>
-<html>
+<html class="home">
 <head>
   <title>The Borgo Programming Language</title>
   <meta charset="utf-8">
-  <style>
-      body { max-width: 60em; margin: 0 auto 1.5em; }
-      pre { padding: 1em; border: 1px solid #ddd; }
-  </style>
+  <link rel="stylesheet" href="/style.css" />
 </head>
 <body>
   <h1 id="the-borgo-programming-language">The Borgo Programming Language</h1>
-<p><strong>Borgo</strong> is a Rusty functional language that compiles to Go.</p>
-<p>The Borgo compiler is written in Rust. Check out the
-<strong><a href="https://borgo-lang.github.io/playground/">online playground</a></strong> for some
-examples.</p>
+<p>Borgo is a statically typed programming language that looks like Rust and
+compiles to Go.</p>
+<p><strong>Check out the <a href="https://borgo-lang.github.io/playground/">online playground</a>
+for an interactive tour of the language</strong>.</p>
+<p>From Rust it <em>borrows</em>:</p>
 <ul>
-<li><a href="#goals">Goals</a></li>
-<li><a href="#tour">Language Tour</a></li>
-<li><a href="#stdlib">Stdlib</a></li>
-<li><a href="#usage">Usage</a></li>
-<li><a href="#running-tests">Tests</a></li>
+<li>Sum types with exhaustive pattern matching</li>
+<li><code>Result&lt;T, E&gt;</code> and <code>Option&lt;T&gt;</code> instead of <code>nil</code></li>
+<li>Type checker with good type inference</li>
+<li>Error handling with <code>?</code> operator</li>
 </ul>
-<h2 id="goals">Goals</h2>
-<p><strong>Simple but powerful type system</strong> - Good type inference like Elm, Haskell,
-Rust.</p>
-<p><strong>Garbage collected</strong> - Optimize for developer experience over extreme
-performance. Leverage Go&#39;s garbage collector.</p>
-<p><strong>Functional</strong> - Algebraic data types, exhaustive pattern matching, immutable
-values and persistent collections.</p>
-<p><strong><code>Result&lt;T, E&gt;</code> error handling and <code>?</code> operator</strong> - Just like in Rust.</p>
-<p><strong>Uniform Function Call Syntax</strong> - All functions can be used as methods, by
-dispatching on the type of the first argument.</p>
-<h2 id="tour">Tour</h2>
-<p>Defining types and functions is similar to Rust.</p>
-<pre><code class="language-rust">enum User {
-    Verified(String),
-    NotVerified,
-}
-
-fn is_verified(u: User) -&gt; Bool {
-    match u {
-        User::Verified(_) =&gt; true,
-        User::NotVerified =&gt; false,
-    }
-}
-
-struct Point {
-    x: Int,
-    y: Float,
-}
-
-let alice = User::Verified(&quot;alice&quot;);
-let a_point = Point { x: 1, y: 5.2 };
-
-Debug::assert_eq(is_verified(alice), true)
-</code></pre>
-<p>All functions can be invoked as methods.</p>
-<pre><code class="language-rust">alice.is_verified()
-</code></pre>
-<p>Which means you can rewrite the original function call as a method chain.</p>
-<pre><code class="language-rust">Debug::assert_eq(is_verified(alice), true)
-
-// same as
-
-alice
-    .is_verified()
-    .assert_eq(true)
-</code></pre>
-<p><code>impl</code> blocks are just syntactic sugar for defining functions.</p>
-<pre><code class="language-rust">impl User {
-    fn get_name(self) -&gt; Option&lt;String&gt; {
-        match u {
-            User::Verified(name) =&gt; Some(name),
-            User::NotVerified =&gt; None,
-        }
-    }
-}
-
-User::get_name(alice)
-
-// same as
-
-alice.get_name()
-</code></pre>
-<p>Lists are first class, so there&#39;s no need for a constructor like <code>vec![]</code>.</p>
-<pre><code class="language-rust">let numbers = [1, 2, 3];
-</code></pre>
-<p>Maps and Sets are also available.</p>
-<pre><code class="language-rust">let users = Map::new()
-    .insert(&quot;alice&quot;, alice)
-    .insert(&quot;bob&quot;, User::NotVerified);
-
-let results = Set::new()
-    .insert(1)
-    .insert(2)
-    .insert(1);
-</code></pre>
-<p>Collections (like all other values) are immutable.</p>
-<pre><code class="language-rust">let new_numbers = numbers.insert(4);
-
-// Original is not modified
-numbers.assert_eq([1,2,3])
-
-new_numbers.assert_eq([1,2,3,4])
-</code></pre>
-<p>Collections can be iterated by turning them into lazy sequences (<code>Seq&lt;T&gt;</code>).</p>
-<pre><code class="language-rust">numbers
-    .seq()           // turn List&lt;T&gt; into Seq&lt;T&gt;
-    .map(|n| n + 5)
-    .to_list()       // turn Seq&lt;T&gt; back into List&lt;T&gt;
-    .assert_eq([6,7,8])
-</code></pre>
-<blockquote>
-<p>Sequences are similar to Rust&#39;s <code>Iterator</code>, but they&#39;re not implemented as a
-trait.</p>
-<p>Note also how there&#39;s no polymorphic <code>.collect()</code> method. Instead, functions
-like <code>to_list</code>, <code>to_map</code> etc. turn a <code>Seq&lt;T&gt;</code> back into a concrete collection.</p>
-</blockquote>
-<p>Sequences are lazy, meaning items are not evaluated until needed.</p>
-<p>This allows creating (potentially infinite) ranges.</p>
-<pre><code class="language-rust">Seq::infinite(0, |n| n + 1)
-    .drop(50)
-    .take(200)
-    .reduce(0, |acc, n| if n % 2 == 0 { acc + n } else { acc })
-</code></pre>
-<p>Elements in a sequence can be iterated with for loops.</p>
-<pre><code class="language-rust">for x in numbers.seq() {
-
-}
-
-for (index, x) in numbers.seq().enumerate() {
-
-}
-</code></pre>
-<p>Infinite loops are also available.</p>
-<pre><code class="language-rust">loop {
-    if some_condition {
-        break;
-    }
-}
-</code></pre>
-<p>There is no <code>null</code> value, use <code>Option&lt;T&gt;</code> instead. Error handling works much
-like Rust, with <code>Result&lt;T&gt;</code> and the <code>?</code> operator.</p>
-<pre><code class="language-rust">enum Error {
-    InvalidName(String),
-    InvalidAge(Int),
-}
-
-struct Person {
-    name: String,
-    age: Int,
-}
-
-impl Person {
-    fn validate_name(s: String) -&gt; Result&lt;String, Error&gt; {
-        if s.len() &lt; 0 || s.len() &gt; 100 {
-            return Err(Error::InvalidName(s));
-        }
-
-        Ok(s)
-    }
-
-    fn validate_age(n: Int) -&gt; Result&lt;Int, Error&gt; {
-        if n % 2 == 0 {
-            return Err(Error::InvalidAge(n));
-        }
-
-        Ok(n)
-    }
-}
-
-fn test() -&gt; Result&lt;Person, Error&gt; {
-    let name = Person::validate_name(&quot;bob&quot;)?;
-    let age = Person::validate_age(99)?;
-    Ok(Person { name, age })
-}
-
-fn borgo_main() {
-    let p = test().unwrap();
-    p.name.assert_eq(&quot;bob&quot;);
-    ()
-}
-</code></pre>
-<p>Tuples are supported, with <code>.N</code> syntax to access the nth element.</p>
-<pre><code class="language-rust">let a = (&quot;foo&quot;, 1);
-let b = (&quot;bar&quot;, 2);
-
-(a.1 + b.1).assert_eq(3)
-</code></pre>
-<p>Mutability can still be achieved with mutable variables.</p>
-<pre><code class="language-rust">fn count&lt;T&gt;(xs: Seq&lt;T&gt;) -&gt; Int {
-    let mut n = 0;
-
-    for _ in xs {
-        n = n + 1;
-    }
-
-    n
-}
-
-count([1, 2, 3].seq()).assert_eq(3);
-</code></pre>
-<h2 id="stdlib">Stdlib</h2>
-<p>Primitive types</p>
-<table>
-<thead>
-<tr>
-<th><strong>Borgo</strong></th>
-<th><strong>Go</strong></th>
-</tr>
-</thead>
-<tbody><tr>
-<td><code>Int</code></td>
-<td><code>int64</code></td>
-</tr>
-<tr>
-<td><code>Float</code></td>
-<td><code>float64</code></td>
-</tr>
-<tr>
-<td><code>Bool</code></td>
-<td><code>bool</code></td>
-</tr>
-<tr>
-<td><code>String</code></td>
-<td><code>string</code></td>
-</tr>
-<tr>
-<td><code>Char</code></td>
-<td><code>rune</code></td>
-</tr>
-<tr>
-<td><code>List&lt;T&gt;</code></td>
-<td><a href="https://github.com/benbjohnson/immutable">immutable.List</a></td>
-</tr>
-</tbody></table>
-<p>The stdlib can be found at
-<a href="https://github.com/borgo-lang/borgo/blob/main/runtime/std/core.brg">runtime/std/core.brg</a>.</p>
-<h2 id="usage">Usage</h2>
-<p>Requirements:</p>
+<p>And leverages Go for:</p>
 <ul>
-<li>Rust toolchain</li>
-<li>Go toolchain</li>
-<li>Deno (if you want to run tests)</li>
+<li>Garbage collector</li>
+<li>Robust runtime with concurrency built-in</li>
+<li>Large package ecosystem with mature libraries</li>
 </ul>
-<p>Run this script to build the compiler and set up a fresh project:</p>
-<pre><code class="language-bash">$ ./init-project PROJECT_NAME
+<p>You can think of Borgo as Rust without the borrow checker if you like, with
+access to all Go packages.</p>
+<h3 id="running-locally">Running locally</h3>
+<p>Assuming you have <code>cargo</code> and <code>just</code> installed:</p>
+<pre><code class="language-bash">just build
+just init-project some-folder
 
-$ ls PROJECT_NAME
-app.brg   # write source code here
-borgo     # compiler
-runtime   # Go runtime
-std       # stdlib
+cd some-folder
+./borgo build &amp;&amp; go run .
 </code></pre>
-<p>Compile and run:</p>
-<pre><code class="language-bash">$ ./borgo build &amp;&amp; go run .
-&quot;Hello world&quot;
-</code></pre>
-<h2 id="running-tests">Running tests</h2>
-<pre><code class="language-bash">$ deno task test-runner [TEST_SUITE]
-</code></pre>
-<p>Where <code>TEST_SUITE</code> is one of:</p>
-<ul>
-<li><code>infer</code> - run type checking on expressions</li>
-<li><code>infer-file</code> - run type checking on files</li>
-<li><code>emit</code> - compile one or more files to Go</li>
-<li><code>eval</code> - just like <code>emit</code> but will use a tree-walking interpreter</li>
-<li><code>examples</code> - run all the examples in the playground</li>
-</ul>
-<p>Omitting <code>TEST_SUITE</code> will run all tests.</p>
- <a href="/playground">Examples and Playground</a><br>
-  <a href="https://github.com/borgo-lang/borgo">Github repo</a>
+
+  <p>
+    <a href="/playground">Playground and Language tour</a>
+    <br><br>
+    <a href="https://github.com/borgo-lang/borgo">Github repo</a>
+  </p>
 </body>
 </html>

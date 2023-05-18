@@ -3,23 +3,15 @@
 /**
 * @param {string} contents
 * @param {string} std_source
-* @returns {Uint8Array}
+* @returns {string}
 */
-export function compile_wasm(contents: string, std_source: string): Uint8Array;
-/**
-* @param {Uint8Array} bytes
-* @param {number} line
-* @param {number} character
-* @returns {string | undefined}
-*/
-export function on_hover(bytes: Uint8Array, line: number, character: number): string | undefined;
+export function compile_wasm(contents: string, std_source: string): string;
 
 export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module;
 
 export interface InitOutput {
   readonly memory: WebAssembly.Memory;
   readonly compile_wasm: (a: number, b: number, c: number, d: number, e: number) => void;
-  readonly on_hover: (a: number, b: number, c: number, d: number, e: number) => void;
   readonly __wbindgen_add_to_stack_pointer: (a: number) => number;
   readonly __wbindgen_malloc: (a: number) => number;
   readonly __wbindgen_realloc: (a: number, b: number, c: number) => number;
@@ -45,4 +37,4 @@ export function initSync(module: SyncInitInput): InitOutput;
 *
 * @returns {Promise<InitOutput>}
 */
-export default function init (module_or_path?: InitInput | Promise<InitInput>): Promise<InitOutput>;
+export default function __wbg_init (module_or_path?: InitInput | Promise<InitInput>): Promise<InitOutput>;
