@@ -6,13 +6,15 @@ html { font-family: sans-serif; color: #222; background: #fdfdfd; }
 h1 { font-size: 1.2em; }
 pre { white-space: pre-wrap; word-wrap: break-word; }
 hr { border: 1px solid #eee; }
-header { adisplay: flex; align-items: center; justify-content: space-between; }
+header { align-items: center; justify-content: space-between; }
 li { margin-bottom: 0.5em; }
 p, ul { margin-bottom: 1.5em; }
 p code, li code { padding: 4px 8px; background: #eee; border-radius: 3px; }
 p a { text-decoration: none; color: var(--primary); border-bottom: 2px solid; }
+footer { font-size: 0.75em; margin-bottom: 3em; padding-top: 0.5em; border-top: 1px solid #eee; }
 
 main { display: flex; align-items: top; justify-content: space-between; flex-wrap: wrap; margin-top: 3em; }
+
 
 
 /* Homepage */
