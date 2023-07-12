@@ -1,20 +1,32 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
-* @param {string} contents
-* @param {string} std_source
-* @returns {string}
+* @param {string} source
+* @param {any} val
+* @returns {any}
 */
-export function compile_wasm(contents: string, std_source: string): string;
+export function compile_wasm(source: string, val: any): any;
+/**
+*/
+export class Output {
+  free(): void;
+}
+/**
+*/
+export class State {
+  free(): void;
+}
 
 export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module;
 
 export interface InitOutput {
   readonly memory: WebAssembly.Memory;
-  readonly compile_wasm: (a: number, b: number, c: number, d: number, e: number) => void;
-  readonly __wbindgen_add_to_stack_pointer: (a: number) => number;
+  readonly __wbg_state_free: (a: number) => void;
+  readonly __wbg_output_free: (a: number) => void;
+  readonly compile_wasm: (a: number, b: number, c: number) => number;
   readonly __wbindgen_malloc: (a: number) => number;
   readonly __wbindgen_realloc: (a: number, b: number, c: number) => number;
+  readonly __wbindgen_exn_store: (a: number) => void;
   readonly __wbindgen_free: (a: number, b: number) => void;
 }
 
