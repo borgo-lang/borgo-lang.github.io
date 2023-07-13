@@ -3,7 +3,7 @@
 <head>
   <title>Borgo Programming Language</title>
   <meta charset="utf-8">
-  <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="/style.css">
 </head>
 <body>
   <header>
@@ -17,8 +17,11 @@
     </div>
 
     <section class="content-pane">
-      <h2 id="section-title"></h2>
-      <div id="section-description"></div>
+      <h2 id="section-title">
+      </h2>
+
+      <div id="section-description">
+      </div>
     </section>
 
     <section class="editor-pane">
@@ -32,24 +35,25 @@
         </div>
 
         <textarea style="display: none;">/// Start editing
+    use fmt;
     fn main() {
-      inspect("Hello world");
+      fmt.Println("Hello world");
     }</textarea>
       </div>
 
       <pre id="output"></pre>
+
       <pre id="errors"></pre>
     </section>
   </main>
 
   <footer>
-    <p>
-      <a href="https://github.com/borgo-lang/borgo">Borgo on Github</a>
+    <p><a href="https://github.com/borgo-lang/borgo">Borgo on Github</a>
     </p>
   </footer>
-
   <script src="/bundle.js"></script> 
   <script type="module">
+
 
     // Rust compiler
     import { default as initRust, compile_wasm } from "/pkg/wasm.js";
