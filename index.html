@@ -1,44 +1,70 @@
 <!DOCTYPE html>
-<html class="home">
+<html>
 <head>
-  <title>The Borgo Programming Language</title>
+  <title>Borgo Programming Language</title>
   <meta charset="utf-8">
-  <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-  <h1 id="the-borgo-programming-language">The Borgo Programming Language</h1>
-<p>Borgo is a statically typed programming language that looks like Rust and
-compiles to Go.</p>
-<p><strong>Check out the <a href="https://borgo-lang.github.io/playground/">online playground</a>
-for an interactive tour of the language</strong>.</p>
-<p>From Rust it <em>borrows</em>:</p>
-<ul>
-<li>Sum types with exhaustive pattern matching</li>
-<li><code>Result&lt;T, E&gt;</code> and <code>Option&lt;T&gt;</code> instead of <code>nil</code></li>
-<li>Type checker with good type inference</li>
-<li>Error handling with <code>?</code> operator</li>
-</ul>
-<p>And leverages Go for:</p>
-<ul>
-<li>Garbage collector</li>
-<li>Robust runtime with concurrency built-in</li>
-<li>Large package ecosystem with mature libraries</li>
-</ul>
-<p>You can think of Borgo as Rust without the borrow checker if you like, with
-access to all Go packages.</p>
-<h3 id="running-locally">Running locally</h3>
-<p>Assuming you have <code>cargo</code> and <code>just</code> installed:</p>
-<pre><code class="language-bash">just build
-just init-project some-folder
+  <header>
+    <h1>Borgo Programming Language</h1>
+  </header>
 
-cd some-folder
-./borgo build &amp;&amp; go run .
-</code></pre>
+  <main>
+    <div class="links-pane">
+      <section id="examples">
+      </section>
+    </div>
 
-  <p>
-    <a href="/playground">Playground and Language tour</a>
-    <br><br>
-    <a href="https://github.com/borgo-lang/borgo">Github repo</a>
-  </p>
+    <section class="content-pane">
+      <h2 id="section-title">
+      </h2>
+
+      <div id="section-description">
+      </div>
+    </section>
+
+    <section class="editor-pane">
+      <div class="actions">
+        <button onclick="Borgo.compile()" title="Shift + Enter">Run</button>
+      </div>
+
+      <div id="editor">
+        <div>
+          Loading compiler...
+        </div>
+
+        <textarea style="display: none;">/// Start editing
+    use fmt;
+    fn main() {
+      fmt.Println("Hello world");
+    }</textarea>
+      </div>
+
+      <pre id="output"></pre>
+
+      <pre id="errors"></pre>
+    </section>
+  </main>
+
+  <footer>
+    <p><a href="https://github.com/borgo-lang/borgo">Borgo on Github</a>
+    </p>
+  </footer>
+  <script src="/bundle.js"></script> 
+  <script type="module">
+
+
+    // Rust compiler
+    import { default as initRust, compile_wasm } from "/pkg/wasm.js";
+
+    await initRust()
+
+    window.Borgo.compile_wasm = compile_wasm
+
+    window.Borgo.main()
+
+    // --------------------
+  </script>
 </body>
 </html>

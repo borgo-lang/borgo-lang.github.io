@@ -19,7 +19,7 @@ main { display: flex; align-items: top; justify-content: space-between; flex-wra
 
 /* Homepage */
 .home { max-width: 60em; margin: 0 auto 1.5em; }
-.home h1 { margin: 1.5em 0 3em; }
+.home h1 { margin: 1.5em 0; }
 
 
 /* Playground */
