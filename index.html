@@ -85,10 +85,10 @@
 <p>Borgo is still early in development, but should be usable!</p>
             </div>
 
-            <pre data-example>use fmt;
+            <pre data-example="&quot;use fmt;\n\nfn main() {\n    fmt.Println(\&quot;hi\&quot;)\n}\n&quot;">use fmt;
 
 fn main() {
-    fmt.Println("hi")
+    fmt.Println(&quot;hi&quot;)
 }
 </pre>
           </article>
@@ -114,29 +114,29 @@ filled in for you.</p>
 <p>Borgo also has tuples! They work exactly like in Rust.</p>
             </div>
 
-            <pre data-example>use fmt;
+            <pre data-example="&quot;use fmt;\n\nfn main() {\n    let n = 1;\n    let s = \&quot;hello\&quot;;\n    let b = false;\n\n    fmt.Println(\&quot;primitives: \&quot;, n, s, b);\n\n    let mut xs = [1, 2, 3];\n    fmt.Println(\&quot;slice:\&quot;, xs);\n\n    xs = xs.append(10);\n    fmt.Println(\&quot;len after append:\&quot;, xs.len());\n\n    let mut m = Map::new();\n    m.insert(1, \&quot;alice\&quot;);\n    m.insert(2, \&quot;bob\&quot;);\n\n    fmt.Println(\&quot;map:\&quot;, m);\n\n    let pair = (\&quot;hey\&quot;, true);\n    fmt.Println(\&quot;second element in tuple:\&quot;, pair.1);\n}\n&quot;">use fmt;
 
 fn main() {
     let n = 1;
-    let s = "hello";
+    let s = &quot;hello&quot;;
     let b = false;
 
-    fmt.Println("primitives: ", n, s, b);
+    fmt.Println(&quot;primitives: &quot;, n, s, b);
 
     let mut xs = [1, 2, 3];
-    fmt.Println("slice:", xs);
+    fmt.Println(&quot;slice:&quot;, xs);
 
     xs = xs.append(10);
-    fmt.Println("len after append:", xs.len());
+    fmt.Println(&quot;len after append:&quot;, xs.len());
 
     let mut m = Map::new();
-    m.insert(1, "alice");
-    m.insert(2, "bob");
+    m.insert(1, &quot;alice&quot;);
+    m.insert(2, &quot;bob&quot;);
 
-    fmt.Println("map:", m);
+    fmt.Println(&quot;map:&quot;, m);
 
-    let pair = ("hey", true);
-    fmt.Println("second element in tuple:", pair.1);
+    let pair = (&quot;hey&quot;, true);
+    fmt.Println(&quot;second element in tuple:&quot;, pair.1);
 }
 </pre>
           </article>
@@ -166,51 +166,51 @@ conditions use <code>while {}</code>.</p>
 their result to a variable.</p>
             </div>
 
-            <pre data-example>use fmt;
+            <pre data-example="&quot;use fmt;\nuse math::rand;\n\nfn main() {\n    let xs = [\&quot;a\&quot;, \&quot;b\&quot;, \&quot;c\&quot;];\n\n    fmt.Println(\&quot;For loop over slices\&quot;);\n    for letter in xs {\n        fmt.Println(letter);\n    }\n\n    fmt.Println(\&quot;Indexed for loop\&quot;);\n    for (index, letter) in xs.enumerate() {\n        fmt.Println(index, letter);\n    }\n\n    let m = Map::new();\n    m.insert(1, \&quot;alice\&quot;);\n    m.insert(2, \&quot;bob\&quot;);\n\n    fmt.Println(\&quot;For loop over maps\&quot;);\n    for (key, value) in m {\n        fmt.Println(key, value);\n    }\n\n    fmt.Println(\&quot;Loop with no condition\&quot;);\n    loop {\n        let n = rand.Float64();\n        fmt.Println(\&quot;looping...\&quot;, n);\n\n        if n &gt; 0.75 {\n            break;\n        }\n    }\n\n    fmt.Println(\&quot;While loop\&quot;);\n\n    let mut count = 0;\n    while (count &lt; 5) {\n        fmt.Println(count);\n        count = count + 1;\n    }\n\n    fmt.Println(\&quot;using if statements as expressions\&quot;);\n    fmt.Println(if 5 &gt; 3 { \&quot;ok\&quot; } else { \&quot;nope\&quot; });\n\n    let block_result = {\n        let a = 1;\n        let b = 2;\n        a + b\n    };\n\n    fmt.Println(\&quot;block result:\&quot;, block_result);\n}\n&quot;">use fmt;
 use math::rand;
 
 fn main() {
-    let xs = ["a", "b", "c"];
+    let xs = [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;];
 
-    fmt.Println("For loop over slices");
+    fmt.Println(&quot;For loop over slices&quot;);
     for letter in xs {
         fmt.Println(letter);
     }
 
-    fmt.Println("Indexed for loop");
+    fmt.Println(&quot;Indexed for loop&quot;);
     for (index, letter) in xs.enumerate() {
         fmt.Println(index, letter);
     }
 
     let m = Map::new();
-    m.insert(1, "alice");
-    m.insert(2, "bob");
+    m.insert(1, &quot;alice&quot;);
+    m.insert(2, &quot;bob&quot;);
 
-    fmt.Println("For loop over maps");
+    fmt.Println(&quot;For loop over maps&quot;);
     for (key, value) in m {
         fmt.Println(key, value);
     }
 
-    fmt.Println("Loop with no condition");
+    fmt.Println(&quot;Loop with no condition&quot;);
     loop {
         let n = rand.Float64();
-        fmt.Println("looping...", n);
+        fmt.Println(&quot;looping...&quot;, n);
 
-        if n > 0.75 {
+        if n &gt; 0.75 {
             break;
         }
     }
 
-    fmt.Println("While loop");
+    fmt.Println(&quot;While loop&quot;);
 
     let mut count = 0;
-    while (count < 5) {
+    while (count &lt; 5) {
         fmt.Println(count);
         count = count + 1;
     }
 
-    fmt.Println("using if statements as expressions");
-    fmt.Println(if 5 > 3 { "ok" } else { "nope" });
+    fmt.Println(&quot;using if statements as expressions&quot;);
+    fmt.Println(if 5 &gt; 3 { &quot;ok&quot; } else { &quot;nope&quot; });
 
     let block_result = {
         let a = 1;
@@ -218,7 +218,7 @@ fn main() {
         a + b
     };
 
-    fmt.Println("block result:", block_result);
+    fmt.Println(&quot;block result:&quot;, block_result);
 }
 </pre>
           </article>
@@ -240,8 +240,35 @@ if you want to learn more.</p>
 <blockquote class="hint"><p>For now, variants can only be defined as tuples and not as structs.</p>
 </blockquote>            </div>
 
-            <pre data-example>use fmt;
+            <pre data-example="&quot;use fmt;\nuse strings;\n\nenum IpAddr {\n    V4(uint8, uint8, uint8, uint8),\n    V6(string),\n}\n\nfn is_private(ip: IpAddr) -&gt; bool {\n    match ip {\n        IpAddr::V4(a, b, _, _) =&gt; {\n            if a == 10 {\n                return true;\n            }\n\n            if a == 172 &amp;&amp; b &gt;= 16 &amp;&amp; b &lt;= 31 {\n                return true;\n            }\n\n            if a == 192 &amp;&amp; b == 168 {\n                return true;\n            }\n\n            false\n        }\n\n        IpAddr::V6(s) =&gt; strings.HasPrefix(s, \&quot;fc00::\&quot;),\n    }\n}\n\nenum Coin {\n    Penny,\n    Nickel,\n    Dime,\n    Quarter,\n}\n\nfn value_in_cents(coin: Coin) -&gt; int {\n    match coin {\n        Coin::Penny =&gt; 1,\n        Coin::Nickel =&gt; 5,\n        Coin::Dime =&gt; 10,\n        Coin::Quarter =&gt; 25,\n    }\n}\n\nfn main() {\n    let home = IpAddr::V4(127, 0, 0, 1);\n    let loopback = IpAddr::V6(\&quot;::1\&quot;);\n    fmt.Println(\&quot;home ip is private: \&quot;, home, is_private(home));\n    fmt.Println(\&quot;loopback: \&quot;, loopback);\n\n    let cents = value_in_cents(Coin::Nickel);\n    fmt.Println(\&quot;cents:\&quot;, cents);\n}\n&quot;">use fmt;
 use strings;
+
+enum IpAddr {
+    V4(uint8, uint8, uint8, uint8),
+    V6(string),
+}
+
+fn is_private(ip: IpAddr) -&gt; bool {
+    match ip {
+        IpAddr::V4(a, b, _, _) =&gt; {
+            if a == 10 {
+                return true;
+            }
+
+            if a == 172 &amp;&amp; b &gt;= 16 &amp;&amp; b &lt;= 31 {
+                return true;
+            }
+
+            if a == 192 &amp;&amp; b == 168 {
+                return true;
+            }
+
+            false
+        }
+
+        IpAddr::V6(s) =&gt; strings.HasPrefix(s, &quot;fc00::&quot;),
+    }
+}
 
 enum Coin {
     Penny,
@@ -250,50 +277,23 @@ enum Coin {
     Quarter,
 }
 
-fn value_in_cents(coin: Coin) -> int {
+fn value_in_cents(coin: Coin) -&gt; int {
     match coin {
-        Coin::Penny => 1,
-        Coin::Nickel => 5,
-        Coin::Dime => 10,
-        Coin::Quarter => 25,
-    }
-}
-
-enum IpAddr {
-    V4(uint8, uint8, uint8, uint8),
-    V6(string),
-}
-
-fn is_private(ip: IpAddr) -> bool {
-    match ip {
-        IpAddr::V4(a, b, _, _) => {
-            if a == 10 {
-                return true;
-            }
-
-            if a == 172 && b >= 16 && b <= 31 {
-                return true;
-            }
-
-            if a == 192 && b == 168 {
-                return true;
-            }
-
-            false
-        }
-
-        IpAddr::V6(s) => strings.HasPrefix(s, "fc00::"),
+        Coin::Penny =&gt; 1,
+        Coin::Nickel =&gt; 5,
+        Coin::Dime =&gt; 10,
+        Coin::Quarter =&gt; 25,
     }
 }
 
 fn main() {
-    let cents = value_in_cents(Coin::Nickel);
-    fmt.Println("cents:", cents);
-
     let home = IpAddr::V4(127, 0, 0, 1);
-    let loopback = IpAddr::V6("::1");
-    fmt.Println("home ip is private: ", home, is_private(home));
-    fmt.Println("loopback: ", loopback);
+    let loopback = IpAddr::V6(&quot;::1&quot;);
+    fmt.Println(&quot;home ip is private: &quot;, home, is_private(home));
+    fmt.Println(&quot;loopback: &quot;, loopback);
+
+    let cents = value_in_cents(Coin::Nickel);
+    fmt.Println(&quot;cents:&quot;, cents);
 }
 </pre>
           </article>
@@ -308,7 +308,7 @@ fn main() {
 (<code>let mut</code> keyword).</p>
             </div>
 
-            <pre data-example>use fmt;
+            <pre data-example="&quot;use fmt;\n\nstruct Person {\n    name: string,\n    hobbies: [Hobby],\n}\n\nenum Hobby {\n    SkyDiving,\n    StaringAtWall,\n    Other(string),\n}\n\nfn main() {\n    let mut p = Person {\n        name: \&quot;bob\&quot;,\n        hobbies: [Hobby::StaringAtWall, Hobby::Other(\&quot;sleep\&quot;)],\n    };\n\n    fmt.Println(\&quot;person:\&quot;, p);\n\n    p.hobbies = p.hobbies.append(Hobby::SkyDiving);\n    fmt.Println(\&quot;with more hobbies:\&quot;, p);\n}\n&quot;">use fmt;
 
 struct Person {
     name: string,
@@ -323,14 +323,14 @@ enum Hobby {
 
 fn main() {
     let mut p = Person {
-        name: "bob",
-        hobbies: [Hobby::StaringAtWall, Hobby::Other("sleep")],
+        name: &quot;bob&quot;,
+        hobbies: [Hobby::StaringAtWall, Hobby::Other(&quot;sleep&quot;)],
     };
 
-    fmt.Println("person:", p);
+    fmt.Println(&quot;person:&quot;, p);
 
     p.hobbies = p.hobbies.append(Hobby::SkyDiving);
-    fmt.Println("with more hobbies:", p);
+    fmt.Println(&quot;with more hobbies:&quot;, p);
 }
 </pre>
           </article>
@@ -356,39 +356,39 @@ Like in Rust, this is an unsafe operation and will panic.</p>
 the stdlib are welcome!</p>
             </div>
 
-            <pre data-example>use fmt;
+            <pre data-example="&quot;use fmt;\n\nstruct Person {\n    name: string,\n    age: int,\n}\n\nfn validate(name: string, age: int) -&gt; Result&lt;Person, string&gt; {\n    if (age &lt; 18) {\n        return Err(\&quot;too young\&quot;);\n    }\n\n    if (age &gt; 98) {\n        return Err(\&quot;too old\&quot;);\n    }\n\n    Ok(Person { name, age })\n}\n\nfn main() {\n    let xs = [\&quot;a\&quot;, \&quot;b\&quot;, \&quot;c\&quot;];\n    let element = xs.get(2); // Option&lt;string&gt;\n\n    match element {\n        Some(s) =&gt; fmt.Println(\&quot;ok, the element was found:\&quot;, s),\n        None =&gt; fmt.Println(\&quot;element not found\&quot;),\n    }\n\n    let result = validate(\&quot;alice\&quot;, 33); // Result&lt;Person, string&gt;\n\n    match result {\n        Ok(p) =&gt; fmt.Println(\&quot;got a person:\&quot;, p),\n        Err(e) =&gt; fmt.Println(\&quot;couldn&#39;t validate:\&quot;, e),\n    }\n}\n&quot;">use fmt;
 
 struct Person {
     name: string,
     age: int,
 }
 
-fn validate(name: string, age: int) -> Result<Person, string> {
-    if (age < 18) {
-        return Err("too young");
+fn validate(name: string, age: int) -&gt; Result&lt;Person, string&gt; {
+    if (age &lt; 18) {
+        return Err(&quot;too young&quot;);
     }
 
-    if (age > 98) {
-        return Err("too old");
+    if (age &gt; 98) {
+        return Err(&quot;too old&quot;);
     }
 
     Ok(Person { name, age })
 }
 
 fn main() {
-    let xs = ["a", "b", "c"];
-    let element = xs.get(2); // Option<string>
+    let xs = [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;];
+    let element = xs.get(2); // Option&lt;string&gt;
 
     match element {
-        Some(s) => fmt.Println("ok, the element was found:", s),
-        None => fmt.Println("element not found"),
+        Some(s) =&gt; fmt.Println(&quot;ok, the element was found:&quot;, s),
+        None =&gt; fmt.Println(&quot;element not found&quot;),
     }
 
-    let result = validate("alice", 33); // Result<Person, string>
+    let result = validate(&quot;alice&quot;, 33); // Result&lt;Person, string&gt;
 
     match result {
-        Ok(p) => fmt.Println("got a person:", p),
-        Err(e) => fmt.Println("couldn't validate:", e),
+        Ok(p) =&gt; fmt.Println(&quot;got a person:&quot;, p),
+        Err(e) =&gt; fmt.Println(&quot;couldn&#39;t validate:&quot;, e),
     }
 }
 </pre>
@@ -443,25 +443,25 @@ code! All is needed is a package declaration, which is discussed in the next
 section.</p>
             </div>
 
-            <pre data-example>use fmt;
+            <pre data-example="&quot;use fmt;\nuse io::fs; // TODO there should be no need of importing this\nuse os;\n\nfn main() {\n    let key = os.LookupEnv(\&quot;HOME\&quot;);\n\n    match key {\n        // Option&lt;T&gt;\n        Some(s) =&gt; fmt.Println(\&quot;home dir:\&quot;, s),\n        None =&gt; fmt.Println(\&quot;Not found in env\&quot;),\n    }\n\n    let info = os.Stat(\&quot;file-does-not-exist\&quot;);\n\n    match info {\n        // Result&lt;T, E&gt;\n        Ok(_) =&gt; fmt.Println(\&quot;The file exists\&quot;),\n        Err(err) =&gt; fmt.Println(\&quot;Got error reading file\&quot;, err),\n    }\n}\n&quot;">use fmt;
 use io::fs; // TODO there should be no need of importing this
 use os;
 
 fn main() {
-    let key = os.LookupEnv("HOME");
+    let key = os.LookupEnv(&quot;HOME&quot;);
 
     match key {
-        // Option<T>
-        Some(s) => fmt.Println("home dir:", s),
-        None => fmt.Println("Not found in env"),
+        // Option&lt;T&gt;
+        Some(s) =&gt; fmt.Println(&quot;home dir:&quot;, s),
+        None =&gt; fmt.Println(&quot;Not found in env&quot;),
     }
 
-    let info = os.Stat("file-does-not-exist");
+    let info = os.Stat(&quot;file-does-not-exist&quot;);
 
     match info {
-        // Result<T, E>
-        Ok(_) => fmt.Println("The file exists"),
-        Err(err) => fmt.Println("Got error reading file", err),
+        // Result&lt;T, E&gt;
+        Ok(_) =&gt; fmt.Println(&quot;The file exists&quot;),
+        Err(err) =&gt; fmt.Println(&quot;Got error reading file&quot;, err),
     }
 }
 </pre>
@@ -510,14 +510,14 @@ running the following:</p>
 </code></pre>
             </div>
 
-            <pre data-example>use fmt;
+            <pre data-example="&quot;use fmt;\nuse regexp;\n\nfn main() {\n    let validID = regexp.MustCompile(r\&quot;^[a-z]+\\[[0-9]+\\]$\&quot;);\n\n    fmt.Println(validID.MatchString(\&quot;adam[23]\&quot;));\n    fmt.Println(validID.MatchString(\&quot;eve[7]\&quot;));\n}\n&quot;">use fmt;
 use regexp;
 
 fn main() {
-    let validID = regexp.MustCompile(r"^[a-z]+\[[0-9]+\]$");
+    let validID = regexp.MustCompile(r&quot;^[a-z]+\[[0-9]+\]$&quot;);
 
-    fmt.Println(validID.MatchString("adam[23]"));
-    fmt.Println(validID.MatchString("eve[7]"));
+    fmt.Println(validID.MatchString(&quot;adam[23]&quot;));
+    fmt.Println(validID.MatchString(&quot;eve[7]&quot;));
 }
 </pre>
           </article>
@@ -569,7 +569,7 @@ mutable references live at the same point, something that would not be permitted
 by Rust&#39;s ownership rules.</p>
 </blockquote>            </div>
 
-            <pre data-example>// example missing,
+            <pre data-example="&quot;// example missing,\n\nfn main() {}\n&quot;">// example missing,
 
 fn main() {}
 </pre>
@@ -588,7 +588,7 @@ fn main() {}
 functions namespaced with the type name (ie. <code>Person_new()</code>).</p>
             </div>
 
-            <pre data-example>use fmt;
+            <pre data-example="&quot;use fmt;\n\nstruct Person {\n    name: string,\n    hours_slept: int,\n}\n\nimpl Person {\n    fn new(name: string) -&gt; Person {\n        Person {\n            name,\n            hours_slept: 0,\n        }\n    }\n\n    // Needs mutable reference because modifies structure\n    fn sleep(&amp;mut self) {\n        self.hours_slept = self.hours_slept + 1;\n    }\n\n    // Ok with read-only reference\n    fn ready_for_work(&amp;self) -&gt; bool {\n        self.hours_slept &gt; 5\n    }\n\n    fn ready_to_party(&amp;self) -&gt; bool {\n        self.hours_slept &gt; 10\n    }\n}\n\nfn main() {\n    let mut p = Person::new(\&quot;alice\&quot;);\n\n    p.sleep();\n    p.sleep();\n\n    fmt.Println(\&quot;is ready:\&quot;, p.ready_for_work());\n}\n&quot;">use fmt;
 
 struct Person {
     name: string,
@@ -596,7 +596,7 @@ struct Person {
 }
 
 impl Person {
-    fn new(name: string) -> Person {
+    fn new(name: string) -&gt; Person {
         Person {
             name,
             hours_slept: 0,
@@ -604,27 +604,27 @@ impl Person {
     }
 
     // Needs mutable reference because modifies structure
-    fn sleep(&mut self) {
+    fn sleep(&amp;mut self) {
         self.hours_slept = self.hours_slept + 1;
     }
 
     // Ok with read-only reference
-    fn ready_for_work(&self) -> bool {
-        self.hours_slept > 5
+    fn ready_for_work(&amp;self) -&gt; bool {
+        self.hours_slept &gt; 5
     }
 
-    fn ready_to_party(&self) -> bool {
-        self.hours_slept > 10
+    fn ready_to_party(&amp;self) -&gt; bool {
+        self.hours_slept &gt; 10
     }
 }
 
 fn main() {
-    let mut p = Person::new("alice");
+    let mut p = Person::new(&quot;alice&quot;);
 
     p.sleep();
     p.sleep();
 
-    fmt.Println("is ready:", p.ready_for_work());
+    fmt.Println(&quot;is ready:&quot;, p.ready_for_work());
 }
 </pre>
           </article>
@@ -657,12 +657,12 @@ you can only define methods in interfaces. Constraints still work, but they will
 only be checked by the Go compiler.</p>
 </blockquote>            </div>
 
-            <pre data-example>use fmt;
+            <pre data-example="&quot;use fmt;\nuse math;\n\ntrait geometry {\n    fn area() -&gt; float64;\n    fn perim() -&gt; float64;\n}\n\nstruct rect {\n    width: float64,\n    height: float64,\n}\n\nimpl rect {\n    fn area(self) -&gt; float64 {\n        self.width * self.height\n    }\n\n    fn perim(self) -&gt; float64 {\n        2 * self.width + 2 * self.height\n    }\n}\n\nstruct circle {\n    radius: float64,\n}\n\nimpl circle {\n    fn area(self) -&gt; float64 {\n        math.Pi * self.radius * self.radius\n    }\n\n    fn perim(self) -&gt; float64 {\n        2 * math.Pi * self.radius\n    }\n}\n\nfn measure(g: geometry) {\n    fmt.Println(g);\n    fmt.Println(g.area());\n    fmt.Println(g.perim());\n}\n\nfn main() {\n    let r = rect {\n        width: 3,\n        height: 4,\n    };\n    let c = circle { radius: 5 };\n\n    measure(r);\n    measure(c);\n}\n&quot;">use fmt;
 use math;
 
 trait geometry {
-    fn area() -> float64;
-    fn perim() -> float64;
+    fn area() -&gt; float64;
+    fn perim() -&gt; float64;
 }
 
 struct rect {
@@ -671,11 +671,11 @@ struct rect {
 }
 
 impl rect {
-    fn area(self) -> float64 {
+    fn area(self) -&gt; float64 {
         self.width * self.height
     }
 
-    fn perim(self) -> float64 {
+    fn perim(self) -&gt; float64 {
         2 * self.width + 2 * self.height
     }
 }
@@ -685,11 +685,11 @@ struct circle {
 }
 
 impl circle {
-    fn area(self) -> float64 {
+    fn area(self) -&gt; float64 {
         math.Pi * self.radius * self.radius
     }
 
-    fn perim(self) -> float64 {
+    fn perim(self) -&gt; float64 {
         2 * math.Pi * self.radius
     }
 }
@@ -728,15 +728,15 @@ in the Rust book .</p>
 also work with <code>Option</code>.</p>
             </div>
 
-            <pre data-example>use fmt;
+            <pre data-example="&quot;use fmt;\nuse io;\nuse os;\n\nfn copy_file(src: string, dst: string) -&gt; Result&lt;(), error&gt; {\n    let stat = os.Stat(src)?;\n\n    if !stat.Mode().IsRegular() {\n        return Err(fmt.Errorf(\&quot;%s is not a regular file\&quot;, src));\n    }\n\n    let source = os.Open(src)?;\n    defer!(source.Close());\n\n    let destination = os.Create(dst)?;\n    defer!(destination.Close());\n\n    // ignore number of bytes copied\n    let _ = io.Copy(destination, source)?;\n\n    Ok(())\n}\n\nfn main() {\n    match copy_file(\&quot;go.mod\&quot;, \&quot;asdf\&quot;) {\n        Ok(_) =&gt; fmt.Println(\&quot;file copied\&quot;),\n        Err(e) =&gt; fmt.Println(\&quot;error copying:\&quot;, e),\n    }\n}\n&quot;">use fmt;
 use io;
 use os;
 
-fn copy_file(src: string, dst: string) -> Result<(), error> {
+fn copy_file(src: string, dst: string) -&gt; Result&lt;(), error&gt; {
     let stat = os.Stat(src)?;
 
     if !stat.Mode().IsRegular() {
-        return Err(fmt.Errorf("%s is not a regular file", src));
+        return Err(fmt.Errorf(&quot;%s is not a regular file&quot;, src));
     }
 
     let source = os.Open(src)?;
@@ -752,9 +752,9 @@ fn copy_file(src: string, dst: string) -> Result<(), error> {
 }
 
 fn main() {
-    match copy_file("go.mod", "asdf") {
-        Ok(_) => fmt.Println("file copied"),
-        Err(e) => fmt.Println("error copying:", e),
+    match copy_file(&quot;go.mod&quot;, &quot;asdf&quot;) {
+        Ok(_) =&gt; fmt.Println(&quot;file copied&quot;),
+        Err(e) =&gt; fmt.Println(&quot;error copying:&quot;, e),
     }
 }
 </pre>
