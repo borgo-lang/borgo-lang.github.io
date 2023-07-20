@@ -15,51 +15,63 @@
       <section id="examples">
                   <a
             href="#intro"
-            onClick="Borgo.selectExample('intro')">
+            onClick="Borgo.selectExample('intro')"
+          >
               Intro          </a>
                   <a
             href="#primitive-types"
-            onClick="Borgo.selectExample('primitive-types')">
+            onClick="Borgo.selectExample('primitive-types')"
+          >
               Primitive Types          </a>
                   <a
             href="#control-flow"
-            onClick="Borgo.selectExample('control-flow')">
+            onClick="Borgo.selectExample('control-flow')"
+          >
               Control flow          </a>
                   <a
             href="#union-types-and-pattern-matching"
-            onClick="Borgo.selectExample('union-types-and-pattern-matching')">
+            onClick="Borgo.selectExample('union-types-and-pattern-matching')"
+          >
               Union types and pattern matching          </a>
                   <a
             href="#structs"
-            onClick="Borgo.selectExample('structs')">
+            onClick="Borgo.selectExample('structs')"
+          >
               Structs          </a>
                   <a
             href="#result-and-option"
-            onClick="Borgo.selectExample('result-and-option')">
+            onClick="Borgo.selectExample('result-and-option')"
+          >
               Result and Option          </a>
                   <a
             href="#interoperability-with-go"
-            onClick="Borgo.selectExample('interoperability-with-go')">
+            onClick="Borgo.selectExample('interoperability-with-go')"
+          >
               Interoperability with Go          </a>
                   <a
             href="#package-definitions"
-            onClick="Borgo.selectExample('package-definitions')">
+            onClick="Borgo.selectExample('package-definitions')"
+          >
               Package definitions          </a>
                   <a
             href="#pointers-and-references"
-            onClick="Borgo.selectExample('pointers-and-references')">
+            onClick="Borgo.selectExample('pointers-and-references')"
+          >
               Pointers and References          </a>
                   <a
             href="#methods"
-            onClick="Borgo.selectExample('methods')">
+            onClick="Borgo.selectExample('methods')"
+          >
               Methods          </a>
                   <a
             href="#interfaces-traits"
-            onClick="Borgo.selectExample('interfaces-traits')">
+            onClick="Borgo.selectExample('interfaces-traits')"
+          >
               Interfaces (traits)          </a>
                   <a
             href="#error-handling"
-            onClick="Borgo.selectExample('error-handling')">
+            onClick="Borgo.selectExample('error-handling')"
+          >
               Error handling          </a>
               </section>
     </div>
@@ -83,6 +95,11 @@
 </ul>
 
 <p>Borgo is still early in development, but should be usable!</p>
+
+<p>This playground runs the compiler as a wasm binary and then sends the transpiled
+go output to the official Go playground for execution.</p>
+
+<p>Check the README for instructions on how to run the compiler locally.</p>
             </div>
 
             <pre data-example="&quot;use fmt;\n\nfn main() {\n    fmt.Println(\&quot;hi\&quot;)\n}\n&quot;">use fmt;
@@ -472,14 +489,15 @@ fn main() {
 
             <div>
               <p>In order to use existing Go packages, Borgo needs to know what types and
-functions they contain.</p>
+functions they contain. This is done in declaration files, which serve a similar
+purpose to what you might see in Typescript with <code>d.ts</code> files.</p>
 
-<p>You can see these bindings in the
-<a href="https://github.com/borgo-lang/borgo/tree/main/std">std/</a> folder.</p>
+<p>Only a small part of the Go stdlib is currently available for use in Borgo --
+check the <a href="https://github.com/borgo-lang/borgo/tree/main/std">std/</a> folder for
+more information.</p>
 
 <p>The example on the right uses the <code>regexp</code> package from the Go standard library.
-That&#39;s only possible because of the bindings at <code>std/regexp/regexp.rgb</code>, which
-look like this:</p>
+The relevant bindings are defined in <code>std/regexp/regexp.brg</code> (here&#39;s a snippet):</p>
 
 <pre><code>struct Regexp { }
 
@@ -496,18 +514,19 @@ fn Match  (pattern: string, b: [byte]) -&gt; Result&lt;bool&gt; { EXT }
 // ... other stuff
 </code></pre>
 
-<p>Right now the stdlib comes with very few bindings to the actual Go stdlib, just
-a few functions here and there for testing purposes.</p>
-
 <p>Writing such declarations by hand is a pain! There&#39;s no reason why this process
 couldn&#39;t be automated though. The compiler comes with an <code>importer</code> tool that
 parses a Go package and generates corresponding bindings to be used in Borgo.</p>
 
-<p>So if bindings to the <code>regexp</code> package didn&#39;t exist, you could generate them by
-running the following:</p>
+<p>To run the importer on any package in the stdlib, you can use something like the
+following:</p>
 
-<pre><code>just run-importer -folder /usr/local/go/src/regexp &gt; std/regexp/regexp.brg
+<pre><code>just run-importer -folder $(go env GOROOT)/src/regexp &gt; std/regexp/regexp.brg
 </code></pre>
+
+<p>All packages also need to be listed in
+<a href="https://github.com/borgo-lang/borgo/tree/main/std/modules.json">std/modules.json</a>
+for now.</p>
             </div>
 
             <pre data-example="&quot;use fmt;\nuse regexp;\n\nfn main() {\n    let validID = regexp.MustCompile(r\&quot;^[a-z]+\\[[0-9]+\\]$\&quot;);\n\n    fmt.Println(validID.MatchString(\&quot;adam[23]\&quot;));\n    fmt.Println(validID.MatchString(\&quot;eve[7]\&quot;));\n}\n&quot;">use fmt;
@@ -788,6 +807,7 @@ fn main() {
     <p><a href="https://github.com/borgo-lang/borgo">Borgo on Github</a>
     </p>
   </footer>
+  <script type="module">document.documentElement.classList.add("has-js");</script>
   <script src="/bundle.js"></script> 
   <script type="module">
     // Rust compiler
