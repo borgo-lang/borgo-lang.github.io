@@ -746,7 +746,7 @@ in the Rust book .</p>
 also work with <code>Option</code>.</p>
             </div>
 
-            <pre data-example="&quot;use fmt;\nuse io;\nuse os;\n\nfn copy_file(src: string, dst: string) -&gt; Result&lt;(), error&gt; {\n    let stat = os.Stat(src)?;\n\n    if !stat.Mode().IsRegular() {\n        return Err(fmt.Errorf(\&quot;%s is not a regular file\&quot;, src));\n    }\n\n    let source = os.Open(src)?;\n    defer!(source.Close());\n\n    let destination = os.Create(dst)?;\n    defer!(destination.Close());\n\n    // ignore number of bytes copied\n    let _ = io.Copy(destination, source)?;\n\n    Ok(())\n}\n\nfn main() {\n    match copy_file(\&quot;go.mod\&quot;, \&quot;asdf\&quot;) {\n        Ok(_) =&gt; fmt.Println(\&quot;file copied\&quot;),\n        Err(e) =&gt; fmt.Println(\&quot;error copying:\&quot;, e),\n    }\n}\n&quot;">use fmt;
+            <pre data-example="&quot;use fmt;\nuse io;\nuse os;\n\nfn copy_file(src: string, dst: string) -&gt; Result&lt;(), error&gt; {\n    let stat = os.Stat(src)?;\n\n    if !stat.Mode().IsRegular() {\n        return Err(fmt.Errorf(\&quot;%s is not a regular file\&quot;, src));\n    }\n\n    let source = os.Open(src)?;\n    defer!(source.Close());\n\n    let destination = os.Create(dst)?;\n    defer!(destination.Close());\n\n    // ignore number of bytes copied\n    let _ = io.Copy(destination, source)?;\n\n    Ok(())\n}\n\nfn copy_all_files(folder: string) -&gt; Result&lt;int, error&gt; {\n    let dirs = os.ReadDir(folder)?;\n\n    let mut n = 0;\n\n    for f in dirs {\n        if !f.IsDir() {\n            let original = f.Name();\n            let new_name = fmt.Sprintf(\&quot;%s-copy\&quot;, original);\n\n            fmt.Println(\&quot;copying\&quot;, original, \&quot;to\&quot;, new_name);\n\n            copy_file(original, new_name)?;\n            n = n + 1;\n        }\n    }\n\n    Ok(n)\n}\n\nfn main() {\n    match copy_all_files(\&quot;.\&quot;) {\n        Ok(n) =&gt; fmt.Println(n, \&quot;files copied\&quot;),\n        Err(err) =&gt; fmt.Println(\&quot;Got error:\&quot;, err),\n    }\n}\n&quot;">use fmt;
 use io;
 use os;
 
@@ -769,10 +769,30 @@ fn copy_file(src: string, dst: string) -&gt; Result&lt;(), error&gt; {
     Ok(())
 }
 
+fn copy_all_files(folder: string) -&gt; Result&lt;int, error&gt; {
+    let dirs = os.ReadDir(folder)?;
+
+    let mut n = 0;
+
+    for f in dirs {
+        if !f.IsDir() {
+            let original = f.Name();
+            let new_name = fmt.Sprintf(&quot;%s-copy&quot;, original);
+
+            fmt.Println(&quot;copying&quot;, original, &quot;to&quot;, new_name);
+
+            copy_file(original, new_name)?;
+            n = n + 1;
+        }
+    }
+
+    Ok(n)
+}
+
 fn main() {
-    match copy_file(&quot;go.mod&quot;, &quot;asdf&quot;) {
-        Ok(_) =&gt; fmt.Println(&quot;file copied&quot;),
-        Err(e) =&gt; fmt.Println(&quot;error copying:&quot;, e),
+    match copy_all_files(&quot;.&quot;) {
+        Ok(n) =&gt; fmt.Println(n, &quot;files copied&quot;),
+        Err(err) =&gt; fmt.Println(&quot;Got error:&quot;, err),
     }
 }
 </pre>
