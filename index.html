@@ -460,8 +460,7 @@ code! All is needed is a package declaration, which is discussed in the next
 section.</p>
             </div>
 
-            <pre data-example="&quot;use fmt;\nuse io::fs; // TODO there should be no need of importing this\nuse os;\n\nfn main() {\n    let key = os.LookupEnv(\&quot;HOME\&quot;);\n\n    match key {\n        // Option&lt;T&gt;\n        Some(s) =&gt; fmt.Println(\&quot;home dir:\&quot;, s),\n        None =&gt; fmt.Println(\&quot;Not found in env\&quot;),\n    }\n\n    let info = os.Stat(\&quot;file-does-not-exist\&quot;);\n\n    match info {\n        // Result&lt;T, E&gt;\n        Ok(_) =&gt; fmt.Println(\&quot;The file exists\&quot;),\n        Err(err) =&gt; fmt.Println(\&quot;Got error reading file\&quot;, err),\n    }\n}\n&quot;">use fmt;
-use io::fs; // TODO there should be no need of importing this
+            <pre data-example="&quot;use fmt;\nuse os;\n\nfn main() {\n    let key = os.LookupEnv(\&quot;HOME\&quot;);\n\n    match key {\n        // Option&lt;T&gt;\n        Some(s) =&gt; fmt.Println(\&quot;home dir:\&quot;, s),\n        None =&gt; fmt.Println(\&quot;Not found in env\&quot;),\n    }\n\n    let info = os.Stat(\&quot;file-does-not-exist\&quot;);\n\n    match info {\n        // Result&lt;T, E&gt;\n        Ok(_) =&gt; fmt.Println(\&quot;The file exists\&quot;),\n        Err(err) =&gt; fmt.Println(\&quot;Got error reading file\&quot;, err),\n    }\n}\n&quot;">use fmt;
 use os;
 
 fn main() {
