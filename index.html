@@ -88,6 +88,11 @@
             onClick="Borgo.selectExample('channels')"
           >
               Channels          </a>
+                  <a
+            href="#select-statements"
+            onClick="Borgo.selectExample('select-statements')"
+          >
+              Select statements          </a>
               </section>
     </div>
 
@@ -873,7 +878,7 @@ function call. If you&#39;re passing in a lambda, make sure you wrap it in extra
 parens before invoking it, or the parser would fail to recognize it as a
 function call.</p>
 
-<p>Channels and <code>select {}</code> statements are discussed in the next section.</p>
+<p>Channels and <code>select {}</code> statements are discussed next.</p>
             </div>
 
             <pre data-example="&quot;use fmt;\nuse sync;\n\nstruct Counter {\n    count: int,\n    mu: sync::Mutex,\n}\n\nimpl Counter {\n    fn New() -&gt; Counter {\n        Counter {\n            count: 0,\n            mu: zero_value(),\n        }\n    }\n\n    fn Inc(&amp;mut self) {\n        self.mu.Lock();\n        self.count = self.count + 1;\n        self.mu.Unlock();\n    }\n}\n\nfn main() {\n    let desired = 1000;\n    let counter = Counter::New();\n\n    let wg: sync::WaitGroup = zero_value();\n    wg.Add(desired);\n\n    let mut i = 0;\n\n    while (i &lt; desired) {\n        // equivalent to:   go func() { ... }()\n        spawn!((|| {\n            counter.Inc();\n            wg.Done();\n        })());\n\n        i = i + 1;\n    }\n\n    wg.Wait();\n\n    fmt.Println(\&quot;Counter value:\&quot;, counter.count);\n}\n&quot;">use fmt;
@@ -955,6 +960,49 @@ fn main() {
     let msg2 = receiver.recv();
 
     fmt.Println(msg + msg2);
+}
+</pre>
+          </article>
+                  <article data-slug="select-statements">
+            <h2>
+              Select statements            </h2>
+
+            <div>
+              <p>There&#39;s no first class support for <code>select {}</code> statements, although you can
+still use them with a bit of a hacky workaround.</p>
+
+<p>Borgo allows you to embed <em>raw</em> Go code by calling the <code>rawgo!()</code> function,
+passing in a string of valid Go code. This isn&#39;t type checked or analyzed in any
+way, but it can be used as a last resort escape hatch when the compiler
+implementation falls short (like for <code>select {}</code>).</p>
+            </div>
+
+            <pre data-example="&quot;use fmt;\nuse time;\n\nfn main() {\n    let (tx1, rx1) = Channel::new();\n    let (tx2, rx2) = Channel::new();\n\n    spawn!((|| {\n        tx1.send(\&quot;a\&quot;);\n    })());\n\n    spawn!((|| {\n        time.Sleep(2 * time.Second);\n        tx2.send(\&quot;b\&quot;);\n    })());\n\n    rawgo!(\n        \&quot;\n        select {\n            case a := &lt;-rx1:\n                fmt.Println(\\\&quot;got\\\&quot;, a)\n            case b := &lt;-rx2:\n                fmt.Println(\\\&quot;got\\\&quot;, b)\n        }\n    \&quot;\n    );\n}\n&quot;">use fmt;
+use time;
+
+fn main() {
+    let (tx1, rx1) = Channel::new();
+    let (tx2, rx2) = Channel::new();
+
+    spawn!((|| {
+        tx1.send(&quot;a&quot;);
+    })());
+
+    spawn!((|| {
+        time.Sleep(2 * time.Second);
+        tx2.send(&quot;b&quot;);
+    })());
+
+    rawgo!(
+        &quot;
+        select {
+            case a := &lt;-rx1:
+                fmt.Println(\&quot;got\&quot;, a)
+            case b := &lt;-rx2:
+                fmt.Println(\&quot;got\&quot;, b)
+        }
+    &quot;
+    );
 }
 </pre>
           </article>
