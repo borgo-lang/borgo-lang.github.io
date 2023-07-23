@@ -73,6 +73,21 @@
             onClick="Borgo.selectExample('error-handling')"
           >
               Error handling          </a>
+                  <a
+            href="#zero-values-and-nil"
+            onClick="Borgo.selectExample('zero-values-and-nil')"
+          >
+              Zero values and nil          </a>
+                  <a
+            href="#concurrency-goroutines"
+            onClick="Borgo.selectExample('concurrency-goroutines')"
+          >
+              Concurrency (goroutines)          </a>
+                  <a
+            href="#channels"
+            onClick="Borgo.selectExample('channels')"
+          >
+              Channels          </a>
               </section>
     </div>
 
@@ -82,7 +97,7 @@
               Intro            </h2>
 
             <div>
-              <p><strong>Borgo</strong> is a programming language that targets Go.</p>
+              <p><strong>Borgo</strong> is a statically typed programming language that compiles to Go.</p>
 
 <p>Imagine Go had:</p>
 
@@ -120,7 +135,8 @@ fn main() {
 values.</p>
 
 <p>For example, a slice of int elements would be declared as <code>[]int{1,2,3}</code> in Go,
-whereas Borgo doesn&#39;t need type information, so you can just write <code>[1, 2, 3]</code>.</p>
+whereas Borgo relies on type inference to determine the type, so you can just
+write <code>[1, 2, 3]</code>.</p>
 
 <p>Functions like <code>append()</code> and <code>len()</code> are available as methods.</p>
 
@@ -323,6 +339,9 @@ fn main() {
 
 <p>Fields in structs can be modified only if the variable is declared as mutable
 (<code>let mut</code> keyword).</p>
+
+<p>Contrary to Go, all struct fields must be initialized. See the section on <code>nil</code>
+and zero values for more information.</p>
             </div>
 
             <pre data-example="&quot;use fmt;\n\nstruct Person {\n    name: string,\n    hobbies: [Hobby],\n}\n\nenum Hobby {\n    SkyDiving,\n    StaringAtWall,\n    Other(string),\n}\n\nfn main() {\n    let mut p = Person {\n        name: \&quot;bob\&quot;,\n        hobbies: [Hobby::StaringAtWall, Hobby::Other(\&quot;sleep\&quot;)],\n    };\n\n    fmt.Println(\&quot;person:\&quot;, p);\n\n    p.hobbies = p.hobbies.append(Hobby::SkyDiving);\n    fmt.Println(\&quot;with more hobbies:\&quot;, p);\n}\n&quot;">use fmt;
@@ -600,7 +619,8 @@ fn main() {}
               <p>To define methods on types, you can use <code>impl {}</code> blocks.</p>
 
 <p>Methods need a <code>self</code> receiver, like in Rust. If the receiver is <code>&amp;mut self</code> or
-<code>&amp;self</code> then the generated method will be a pointer receiver <code>(self *T)</code>.</p>
+<code>&amp;self</code> then the generated method will be a pointer receiver <code>(self *T)</code> in the
+final Go output.</p>
 
 <p>It&#39;s also possible to declare static methods: they will compile to normal
 functions namespaced with the type name (ie. <code>Person_new()</code>).</p>
@@ -746,7 +766,7 @@ in the Rust book .</p>
 also work with <code>Option</code>.</p>
             </div>
 
-            <pre data-example="&quot;use fmt;\nuse io;\nuse os;\n\nfn copy_file(src: string, dst: string) -&gt; Result&lt;(), error&gt; {\n    let stat = os.Stat(src)?;\n\n    if !stat.Mode().IsRegular() {\n        return Err(fmt.Errorf(\&quot;%s is not a regular file\&quot;, src));\n    }\n\n    let source = os.Open(src)?;\n    defer!(source.Close());\n\n    let destination = os.Create(dst)?;\n    defer!(destination.Close());\n\n    // ignore number of bytes copied\n    let _ = io.Copy(destination, source)?;\n\n    Ok(())\n}\n\nfn copy_all_files(folder: string) -&gt; Result&lt;int, error&gt; {\n    let dirs = os.ReadDir(folder)?;\n\n    let mut n = 0;\n\n    for f in dirs {\n        if !f.IsDir() {\n            let original = f.Name();\n            let new_name = fmt.Sprintf(\&quot;%s-copy\&quot;, original);\n\n            fmt.Println(\&quot;copying\&quot;, original, \&quot;to\&quot;, new_name);\n\n            copy_file(original, new_name)?;\n            n = n + 1;\n        }\n    }\n\n    Ok(n)\n}\n\nfn main() {\n    match copy_all_files(\&quot;.\&quot;) {\n        Ok(n) =&gt; fmt.Println(n, \&quot;files copied\&quot;),\n        Err(err) =&gt; fmt.Println(\&quot;Got error:\&quot;, err),\n    }\n}\n&quot;">use fmt;
+            <pre data-example="&quot;use fmt;\nuse io;\nuse os;\n\nfn copy_file(src: string, dst: string) -&gt; Result&lt;(), error&gt; {\n    let stat = os.Stat(src)?;\n\n    if !stat.Mode().IsRegular() {\n        return Err(fmt.Errorf(\&quot;%s is not a regular file\&quot;, src));\n    }\n\n    let source = os.Open(src)?;\n    defer!(source.Close());\n\n    let destination = os.Create(dst)?;\n    defer!(destination.Close());\n\n    // ignore number of bytes copied\n    let _ = io.Copy(destination, source)?;\n\n    Ok(())\n}\n\nfn copy_all_files(folder: string) -&gt; Result&lt;int, error&gt; {\n    let mut n = 0;\n\n    for f in os.ReadDir(folder)? {\n        if !f.IsDir() {\n            let original = f.Name();\n            let new_name = fmt.Sprintf(\&quot;%s-copy\&quot;, original);\n\n            fmt.Println(\&quot;copying\&quot;, original, \&quot;to\&quot;, new_name);\n\n            copy_file(original, new_name)?;\n            n = n + 1;\n        }\n    }\n\n    Ok(n)\n}\n\nfn main() {\n    match copy_all_files(\&quot;.\&quot;) {\n        Ok(n) =&gt; fmt.Println(n, \&quot;files copied\&quot;),\n        Err(err) =&gt; fmt.Println(\&quot;Got error:\&quot;, err),\n    }\n}\n&quot;">use fmt;
 use io;
 use os;
 
@@ -770,11 +790,9 @@ fn copy_file(src: string, dst: string) -&gt; Result&lt;(), error&gt; {
 }
 
 fn copy_all_files(folder: string) -&gt; Result&lt;int, error&gt; {
-    let dirs = os.ReadDir(folder)?;
-
     let mut n = 0;
 
-    for f in dirs {
+    for f in os.ReadDir(folder)? {
         if !f.IsDir() {
             let original = f.Name();
             let new_name = fmt.Sprintf(&quot;%s-copy&quot;, original);
@@ -794,6 +812,149 @@ fn main() {
         Ok(n) =&gt; fmt.Println(n, &quot;files copied&quot;),
         Err(err) =&gt; fmt.Println(&quot;Got error:&quot;, err),
     }
+}
+</pre>
+          </article>
+                  <article data-slug="zero-values-and-nil">
+            <h2>
+              Zero values and nil            </h2>
+
+            <div>
+              <p>In Borgo, you can&#39;t create <code>nil</code> values.</p>
+
+<p>The concept of <code>null</code> references (or <code>nil</code> in this case) is being referred to as
+&quot;The billion dollar mistake&quot; and modern languages are moving away from it with
+types like <code>Option&lt;T&gt;</code>. Borgo tries to do the same.</p>
+
+<p>You can still end up with null pointers if you&#39;re calling into existing Go code,
+which is unfortunate. That should be solvable by writing better bindings, so
+that functions that could return a null pointer, will instead return an
+<code>Option&lt;&amp;T&gt;</code>, forcing you to handle all cases.</p>
+
+<p>In Go, it&#39;s common to see types not needing to be initialized, as their <em>zero
+value</em> is ready to be used (ie. <code>sync.Mutex</code> or <code>sync.WaitGroup</code>). Borgo goes in
+the opposite direction, requiring that all values are explicitely initialized.</p>
+
+<p>You can use the built-in function <code>zero_value()</code> whenever you need the <em>zero
+value</em> of a type. While you won&#39;t need to provide a type annotation in all cases
+(as the type can be inferred), it&#39;s probably clearer to annotate variables that
+are initialized with <code>zero_value()</code>.</p>
+
+<p>As mentioned in a previous section, this also applies to struct fields, which
+always need to be initialized.</p>
+            </div>
+
+            <pre data-example="&quot;use bytes;\nuse fmt;\nuse sync;\n\nfn main() {\n    // in Go:\n    // var wg sync.WaitGroup\n    let wg: sync::WaitGroup = zero_value();\n\n    // in Go:\n    // var b bytes.Buffer\n    let b: bytes::Buffer = zero_value();\n\n    fmt.Println(\&quot;variables are initialized:\&quot;, wg, b);\n}\n&quot;">use bytes;
+use fmt;
+use sync;
+
+fn main() {
+    // in Go:
+    // var wg sync.WaitGroup
+    let wg: sync::WaitGroup = zero_value();
+
+    // in Go:
+    // var b bytes.Buffer
+    let b: bytes::Buffer = zero_value();
+
+    fmt.Println(&quot;variables are initialized:&quot;, wg, b);
+}
+</pre>
+          </article>
+                  <article data-slug="concurrency-goroutines">
+            <h2>
+              Concurrency (goroutines)            </h2>
+
+            <div>
+              <p>Borgo aims to support all concurrency primitives available in Go.</p>
+
+<p>You can use <code>spawn!()</code> to start a goroutine. The parameter needs to be a
+function call. If you&#39;re passing in a lambda, make sure you wrap it in extra
+parens before invoking it, or the parser would fail to recognize it as a
+function call.</p>
+
+<p>Channels and <code>select {}</code> statements are discussed in the next section.</p>
+            </div>
+
+            <pre data-example="&quot;use fmt;\nuse sync;\n\nstruct Counter {\n    count: int,\n    mu: sync::Mutex,\n}\n\nimpl Counter {\n    fn New() -&gt; Counter {\n        Counter {\n            count: 0,\n            mu: zero_value(),\n        }\n    }\n\n    fn Inc(&amp;mut self) {\n        self.mu.Lock();\n        self.count = self.count + 1;\n        self.mu.Unlock();\n    }\n}\n\nfn main() {\n    let desired = 1000;\n    let counter = Counter::New();\n\n    let wg: sync::WaitGroup = zero_value();\n    wg.Add(desired);\n\n    let mut i = 0;\n\n    while (i &lt; desired) {\n        // equivalent to:   go func() { ... }()\n        spawn!((|| {\n            counter.Inc();\n            wg.Done();\n        })());\n\n        i = i + 1;\n    }\n\n    wg.Wait();\n\n    fmt.Println(\&quot;Counter value:\&quot;, counter.count);\n}\n&quot;">use fmt;
+use sync;
+
+struct Counter {
+    count: int,
+    mu: sync::Mutex,
+}
+
+impl Counter {
+    fn New() -&gt; Counter {
+        Counter {
+            count: 0,
+            mu: zero_value(),
+        }
+    }
+
+    fn Inc(&amp;mut self) {
+        self.mu.Lock();
+        self.count = self.count + 1;
+        self.mu.Unlock();
+    }
+}
+
+fn main() {
+    let desired = 1000;
+    let counter = Counter::New();
+
+    let wg: sync::WaitGroup = zero_value();
+    wg.Add(desired);
+
+    let mut i = 0;
+
+    while (i &lt; desired) {
+        // equivalent to:   go func() { ... }()
+        spawn!((|| {
+            counter.Inc();
+            wg.Done();
+        })());
+
+        i = i + 1;
+    }
+
+    wg.Wait();
+
+    fmt.Println(&quot;Counter value:&quot;, counter.count);
+}
+</pre>
+          </article>
+                  <article data-slug="channels">
+            <h2>
+              Channels            </h2>
+
+            <div>
+              <p>Borgo doesn&#39;t provide any extra syntax to send/receive from channels.</p>
+
+<p>You use <code>Channel::new()</code> to create a <code>Sender&lt;T&gt;</code> and <code>Receiver&lt;T&gt;</code>.These are
+roughly equivalent to send-only and receive-only channels in Go and will compile
+to raw channels in the final Go output.</p>
+
+<p>With a <code>Sender&lt;T&gt;</code> you can call <code>send(value: T)</code> to send a value. With a
+<code>Receiver&lt;T&gt;</code> you can call <code>recv() -&gt; T</code> to receive a value.</p>
+
+<p>This design is somewhat inspired by the <code>sync::mspc::channel</code> module in the Rust
+standard library.</p>
+            </div>
+
+            <pre data-example="&quot;use fmt;\n\nfn main() {\n    let (sender, receiver) = Channel::new();\n\n    spawn!((|| { sender.send(1) })());\n\n    spawn!((|| { sender.send(2) })());\n\n    let msg = receiver.recv();\n    let msg2 = receiver.recv();\n\n    fmt.Println(msg + msg2);\n}\n&quot;">use fmt;
+
+fn main() {
+    let (sender, receiver) = Channel::new();
+
+    spawn!((|| { sender.send(1) })());
+
+    spawn!((|| { sender.send(2) })());
+
+    let msg = receiver.recv();
+    let msg2 = receiver.recv();
+
+    fmt.Println(msg + msg2);
 }
 </pre>
           </article>
