@@ -102,19 +102,23 @@
               Intro            </h2>
 
             <div>
-              <p><strong>Borgo</strong> is a statically typed programming language that compiles to Go.</p>
+              <p>Borgo is a high-level, garbage collected language for application development.
+It transpiles to Go and aims to be fully compatible with existing Go packages.</p>
 
-<p>Imagine Go had:</p>
+<blockquote class="hint"><p>Borgo syntax <strong>currently looks like Rust</strong>.<br>That&#39;s only to speed up development and skip writing a parser for a custom
+syntax. Borgo has no lifetimes nor borrow checker – it just <em>borrows</em> Rust
+syntax for convenience.</p>
+</blockquote>
+<p><strong>Features:</strong></p>
 
 <ul>
-<li>Rust syntax</li>
-<li>Union types</li>
-<li><code>Option&lt;T&gt;</code> instead of <code>nil</code></li>
-<li><code>Result&lt;T&gt;</code> instead of <code>T, error</code></li>
+<li>Union types and pattern matching</li>
 <li>Error handling with <code>?</code> operator</li>
+<li><code>null</code> safe, use <code>Option</code> and <code>Result</code></li>
+<li>Compatible with Go packages</li>
+<li>Functions that return <code>T,bool</code> become <code>Option&lt;T&gt;</code></li>
+<li>Functions that return <code>T,error</code> become <code>Result&lt;T, error&gt;</code></li>
 </ul>
-
-<p>Borgo is still early in development, but should be usable!</p>
 
 <p>This playground runs the compiler as a wasm binary and then sends the transpiled
 go output to the official Go playground for execution.</p>
@@ -122,10 +126,34 @@ go output to the official Go playground for execution.</p>
 <p>Check the README for instructions on how to run the compiler locally.</p>
             </div>
 
-            <pre data-example="&quot;use fmt;\n\nfn main() {\n    fmt.Println(\&quot;hi\&quot;)\n}\n&quot;">use fmt;
+            <pre data-example="&quot;use fmt;\n\nenum NetworkState&lt;T&gt; {\n    Loading,\n    Failed(int),\n    Success(T),\n}\n\nstruct Response {\n    title: string,\n    duration: int,\n}\n\nfn main() {\n    let res = Response {\n        title: \&quot;Hello world\&quot;,\n        duration: 0,\n    };\n\n    let state = NetworkState::Success(res);\n\n    let msg = match state {\n        NetworkState::Loading =&gt; \&quot;still loading\&quot;,\n        NetworkState::Failed(code) =&gt; fmt.Sprintf(\&quot;Got error code: %d\&quot;, code),\n        NetworkState::Success(res) =&gt; res.title,\n    };\n\n    fmt.Println(msg);\n}\n&quot;">use fmt;
+
+enum NetworkState&lt;T&gt; {
+    Loading,
+    Failed(int),
+    Success(T),
+}
+
+struct Response {
+    title: string,
+    duration: int,
+}
 
 fn main() {
-    fmt.Println(&quot;hi&quot;)
+    let res = Response {
+        title: &quot;Hello world&quot;,
+        duration: 0,
+    };
+
+    let state = NetworkState::Success(res);
+
+    let msg = match state {
+        NetworkState::Loading =&gt; &quot;still loading&quot;,
+        NetworkState::Failed(code) =&gt; fmt.Sprintf(&quot;Got error code: %d&quot;, code),
+        NetworkState::Success(res) =&gt; res.title,
+    };
+
+    fmt.Println(msg);
 }
 </pre>
           </article>
