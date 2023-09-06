@@ -29,10 +29,10 @@
           >
               Control flow          </a>
                   <a
-            href="#union-types-and-pattern-matching"
-            onClick="Borgo.selectExample('union-types-and-pattern-matching')"
+            href="#algebraic-data-types-and-pattern-matching"
+            onClick="Borgo.selectExample('algebraic-data-types-and-pattern-matching')"
           >
-              Union types and pattern matching          </a>
+              Algebraic data types and pattern matching          </a>
                   <a
             href="#structs"
             onClick="Borgo.selectExample('structs')"
@@ -64,10 +64,10 @@
           >
               Methods          </a>
                   <a
-            href="#interfaces-traits"
-            onClick="Borgo.selectExample('interfaces-traits')"
+            href="#interfaces"
+            onClick="Borgo.selectExample('interfaces')"
           >
-              Interfaces (traits)          </a>
+              Interfaces          </a>
                   <a
             href="#error-handling"
             onClick="Borgo.selectExample('error-handling')"
@@ -102,31 +102,19 @@
               Intro            </h2>
 
             <div>
-              <p>Borgo is a high-level, garbage collected language for application development.
-It transpiles to Go and aims to be fully compatible with existing Go packages.</p>
+              <p><img src="https://raw.githubusercontent.com/borgo-lang/borgo-lang.github.io/main/borgo.jpg" alt="Borgo sits between Go and Rust"></p>
 
-<blockquote class="hint"><p>Borgo syntax <strong>currently looks like Rust</strong>.<br>That&#39;s only to speed up development and skip writing a parser for a custom
-syntax. Borgo has no lifetimes nor borrow checker – it just <em>borrows</em> Rust
-syntax for convenience.</p>
-</blockquote>
-<p><strong>Features:</strong></p>
+<p>Borgo is a new programming language that compiles to Go.</p>
 
-<ul>
-<li>Union types and pattern matching</li>
-<li>Error handling with <code>?</code> operator</li>
-<li><code>null</code> safe, use <code>Option</code> and <code>Result</code></li>
-<li>Compatible with Go packages</li>
-<li>Functions that return <code>T,bool</code> become <code>Option&lt;T&gt;</code></li>
-<li>Functions that return <code>T,error</code> become <code>Result&lt;T, error&gt;</code></li>
-</ul>
+<p>For a high-level overview of the features and instructions on running the
+compiler locally, check the
+<a href="https://github.com/borgo-lang/borgo#readme">README</a>.</p>
 
 <p>This playground runs the compiler as a wasm binary and then sends the transpiled
 go output to the official Go playground for execution.</p>
-
-<p>Check the README for instructions on how to run the compiler locally.</p>
             </div>
 
-            <pre data-example="&quot;use fmt;\n\nenum NetworkState&lt;T&gt; {\n    Loading,\n    Failed(int),\n    Success(T),\n}\n\nstruct Response {\n    title: string,\n    duration: int,\n}\n\nfn main() {\n    let res = Response {\n        title: \&quot;Hello world\&quot;,\n        duration: 0,\n    };\n\n    let state = NetworkState::Success(res);\n\n    let msg = match state {\n        NetworkState::Loading =&gt; \&quot;still loading\&quot;,\n        NetworkState::Failed(code) =&gt; fmt.Sprintf(\&quot;Got error code: %d\&quot;, code),\n        NetworkState::Success(res) =&gt; res.title,\n    };\n\n    fmt.Println(msg);\n}\n&quot;">use fmt;
+            <pre data-example="&quot;use fmt\n\nenum NetworkState&lt;T&gt; {\n    Loading,\n    Failed(int),\n    Success(T),\n}\n\nstruct Response {\n    title: string,\n    duration: int,\n}\n\nfn main() {\n    let res = Response {\n        title: \&quot;Hello world\&quot;,\n        duration: 0,\n    }\n\n    let state = NetworkState.Success(res)\n\n    let msg = match state {\n        NetworkState.Loading =&gt; \&quot;still loading\&quot;,\n        NetworkState.Failed(code) =&gt; fmt.Sprintf(\&quot;Got error code: %d\&quot;, code),\n        NetworkState.Success(res) =&gt; res.title,\n    }\n\n    fmt.Println(msg)\n}&quot;">use fmt
 
 enum NetworkState&lt;T&gt; {
     Loading,
@@ -143,19 +131,18 @@ fn main() {
     let res = Response {
         title: &quot;Hello world&quot;,
         duration: 0,
-    };
+    }
 
-    let state = NetworkState::Success(res);
+    let state = NetworkState.Success(res)
 
     let msg = match state {
-        NetworkState::Loading =&gt; &quot;still loading&quot;,
-        NetworkState::Failed(code) =&gt; fmt.Sprintf(&quot;Got error code: %d&quot;, code),
-        NetworkState::Success(res) =&gt; res.title,
-    };
+        NetworkState.Loading =&gt; &quot;still loading&quot;,
+        NetworkState.Failed(code) =&gt; fmt.Sprintf(&quot;Got error code: %d&quot;, code),
+        NetworkState.Success(res) =&gt; res.title,
+    }
 
-    fmt.Println(msg);
-}
-</pre>
+    fmt.Println(msg)
+}</pre>
           </article>
                   <article data-slug="primitive-types">
             <h2>
@@ -173,38 +160,47 @@ write <code>[1, 2, 3]</code>.</p>
 
 <p>Functions like <code>append()</code> and <code>len()</code> are available as methods.</p>
 
-<p>Maps are initialized with the <code>Map::new()</code> function, which under the hood
+<p>Maps are initialized with the <code>Map.new()</code> function, which under the hood
 compiles to a <code>map[K]V{}</code> expression, with the <code>K</code> and <code>V</code> types helpfully
 filled in for you.</p>
 
 <p>Borgo also has tuples! They work exactly like in Rust.</p>
+
+<p>Multiline strings are defined by prefixing each line with <code>\\</code> like in Zig. This
+has the benefit that no character needs escaping and allows more control over
+whitespace.</p>
             </div>
 
-            <pre data-example="&quot;use fmt;\n\nfn main() {\n    let n = 1;\n    let s = \&quot;hello\&quot;;\n    let b = false;\n\n    fmt.Println(\&quot;primitives: \&quot;, n, s, b);\n\n    let mut xs = [1, 2, 3];\n    fmt.Println(\&quot;slice:\&quot;, xs);\n\n    xs = xs.append(10);\n    fmt.Println(\&quot;len after append:\&quot;, xs.len());\n\n    let mut m = Map::new();\n    m.insert(1, \&quot;alice\&quot;);\n    m.insert(2, \&quot;bob\&quot;);\n\n    fmt.Println(\&quot;map:\&quot;, m);\n\n    let pair = (\&quot;hey\&quot;, true);\n    fmt.Println(\&quot;second element in tuple:\&quot;, pair.1);\n}\n&quot;">use fmt;
+            <pre data-example="&quot;use fmt\n\nfn main() {\n  let n = 1\n  let s = \&quot;hello\&quot;\n  let b = false\n\n  fmt.Println(\&quot;primitives: \&quot;, n, s, b)\n\n  let mut xs = [1,2,3]\n  fmt.Println(\&quot;slice:\&quot;, xs)\n\n  xs = xs.append(10)\n  fmt.Println(\&quot;len after append:\&quot;, xs.len())\n\n  let mut m = Map.new()\n  m.insert(1, \&quot;alice\&quot;)\n  m.insert(2, \&quot;bob\&quot;)\n\n  fmt.Println(\&quot;map:\&quot;, m)\n\n  let pair = (\&quot;hey\&quot;, true)\n  fmt.Println(\&quot;second element in tuple:\&quot;, pair.1)\n\n  let multi = \\\\a multi line\n    \\\\  string with unescaped \&quot;quotes\&quot;\n    \\\\ that ends here\n\n  fmt.Println(\&quot;multiline string:\&quot;, multi)\n}&quot;">use fmt
 
 fn main() {
-    let n = 1;
-    let s = &quot;hello&quot;;
-    let b = false;
+  let n = 1
+  let s = &quot;hello&quot;
+  let b = false
 
-    fmt.Println(&quot;primitives: &quot;, n, s, b);
+  fmt.Println(&quot;primitives: &quot;, n, s, b)
 
-    let mut xs = [1, 2, 3];
-    fmt.Println(&quot;slice:&quot;, xs);
+  let mut xs = [1,2,3]
+  fmt.Println(&quot;slice:&quot;, xs)
 
-    xs = xs.append(10);
-    fmt.Println(&quot;len after append:&quot;, xs.len());
+  xs = xs.append(10)
+  fmt.Println(&quot;len after append:&quot;, xs.len())
 
-    let mut m = Map::new();
-    m.insert(1, &quot;alice&quot;);
-    m.insert(2, &quot;bob&quot;);
+  let mut m = Map.new()
+  m.insert(1, &quot;alice&quot;)
+  m.insert(2, &quot;bob&quot;)
 
-    fmt.Println(&quot;map:&quot;, m);
+  fmt.Println(&quot;map:&quot;, m)
 
-    let pair = (&quot;hey&quot;, true);
-    fmt.Println(&quot;second element in tuple:&quot;, pair.1);
-}
-</pre>
+  let pair = (&quot;hey&quot;, true)
+  fmt.Println(&quot;second element in tuple:&quot;, pair.1)
+
+  let multi = \\a multi line
+    \\  string with unescaped &quot;quotes&quot;
+    \\ that ends here
+
+  fmt.Println(&quot;multiline string:&quot;, multi)
+}</pre>
           </article>
                   <article data-slug="control-flow">
             <h2>
@@ -232,82 +228,79 @@ conditions use <code>while {}</code>.</p>
 their result to a variable.</p>
             </div>
 
-            <pre data-example="&quot;use fmt;\nuse math::rand;\n\nfn main() {\n    let xs = [\&quot;a\&quot;, \&quot;b\&quot;, \&quot;c\&quot;];\n\n    fmt.Println(\&quot;For loop over slices\&quot;);\n    for letter in xs {\n        fmt.Println(letter);\n    }\n\n    fmt.Println(\&quot;Indexed for loop\&quot;);\n    for (index, letter) in xs.enumerate() {\n        fmt.Println(index, letter);\n    }\n\n    let m = Map::new();\n    m.insert(1, \&quot;alice\&quot;);\n    m.insert(2, \&quot;bob\&quot;);\n\n    fmt.Println(\&quot;For loop over maps\&quot;);\n    for (key, value) in m {\n        fmt.Println(key, value);\n    }\n\n    fmt.Println(\&quot;Loop with no condition\&quot;);\n    loop {\n        let n = rand.Float64();\n        fmt.Println(\&quot;looping...\&quot;, n);\n\n        if n &gt; 0.75 {\n            break;\n        }\n    }\n\n    fmt.Println(\&quot;While loop\&quot;);\n\n    let mut count = 0;\n    while (count &lt; 5) {\n        fmt.Println(count);\n        count = count + 1;\n    }\n\n    fmt.Println(\&quot;using if statements as expressions\&quot;);\n    fmt.Println(if 5 &gt; 3 { \&quot;ok\&quot; } else { \&quot;nope\&quot; });\n\n    let block_result = {\n        let a = 1;\n        let b = 2;\n        a + b\n    };\n\n    fmt.Println(\&quot;block result:\&quot;, block_result);\n}\n&quot;">use fmt;
-use math::rand;
+            <pre data-example="&quot;use fmt\nuse math.rand\n\nfn main() {\n    let xs = [\&quot;a\&quot;, \&quot;b\&quot;, \&quot;c\&quot;]\n\n    fmt.Println(\&quot;For loop over slices\&quot;)\n    for letter in xs {\n        fmt.Println(letter)\n    }\n\n    fmt.Println(\&quot;Indexed for loop\&quot;)\n    for (index, letter) in xs.enumerate() {\n        fmt.Println(index, letter)\n    }\n\n    let m = Map.new()\n    m.insert(1, \&quot;alice\&quot;)\n    m.insert(2, \&quot;bob\&quot;)\n\n    fmt.Println(\&quot;For loop over maps\&quot;)\n    for (key, value) in m {\n        fmt.Println(key, value)\n    }\n\n    fmt.Println(\&quot;Loop with no condition\&quot;)\n    loop {\n        let n = rand.Float64()\n        fmt.Println(\&quot;looping...\&quot;, n)\n\n        if n &gt; 0.75 {\n            break\n        }\n    }\n\n    fmt.Println(\&quot;While loop\&quot;)\n\n    let mut count = 0\n    while (count &lt; 5) {\n        fmt.Println(count)\n        count = count + 1\n    }\n\n    fmt.Println(\&quot;using if statements as expressions\&quot;)\n    fmt.Println(if 5 &gt; 3 { \&quot;ok\&quot; } else { \&quot;nope\&quot; })\n\n    let block_result = {\n      let a = 1\n      let b = 2\n      a + b\n    }\n\n    fmt.Println(\&quot;block result:\&quot;, block_result)\n}&quot;">use fmt
+use math.rand
 
 fn main() {
-    let xs = [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;];
+    let xs = [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;]
 
-    fmt.Println(&quot;For loop over slices&quot;);
+    fmt.Println(&quot;For loop over slices&quot;)
     for letter in xs {
-        fmt.Println(letter);
+        fmt.Println(letter)
     }
 
-    fmt.Println(&quot;Indexed for loop&quot;);
+    fmt.Println(&quot;Indexed for loop&quot;)
     for (index, letter) in xs.enumerate() {
-        fmt.Println(index, letter);
+        fmt.Println(index, letter)
     }
 
-    let m = Map::new();
-    m.insert(1, &quot;alice&quot;);
-    m.insert(2, &quot;bob&quot;);
+    let m = Map.new()
+    m.insert(1, &quot;alice&quot;)
+    m.insert(2, &quot;bob&quot;)
 
-    fmt.Println(&quot;For loop over maps&quot;);
+    fmt.Println(&quot;For loop over maps&quot;)
     for (key, value) in m {
-        fmt.Println(key, value);
+        fmt.Println(key, value)
     }
 
-    fmt.Println(&quot;Loop with no condition&quot;);
+    fmt.Println(&quot;Loop with no condition&quot;)
     loop {
-        let n = rand.Float64();
-        fmt.Println(&quot;looping...&quot;, n);
+        let n = rand.Float64()
+        fmt.Println(&quot;looping...&quot;, n)
 
         if n &gt; 0.75 {
-            break;
+            break
         }
     }
 
-    fmt.Println(&quot;While loop&quot;);
+    fmt.Println(&quot;While loop&quot;)
 
-    let mut count = 0;
+    let mut count = 0
     while (count &lt; 5) {
-        fmt.Println(count);
-        count = count + 1;
+        fmt.Println(count)
+        count = count + 1
     }
 
-    fmt.Println(&quot;using if statements as expressions&quot;);
-    fmt.Println(if 5 &gt; 3 { &quot;ok&quot; } else { &quot;nope&quot; });
+    fmt.Println(&quot;using if statements as expressions&quot;)
+    fmt.Println(if 5 &gt; 3 { &quot;ok&quot; } else { &quot;nope&quot; })
 
     let block_result = {
-        let a = 1;
-        let b = 2;
-        a + b
-    };
+      let a = 1
+      let b = 2
+      a + b
+    }
 
-    fmt.Println(&quot;block result:&quot;, block_result);
-}
-</pre>
+    fmt.Println(&quot;block result:&quot;, block_result)
+}</pre>
           </article>
-                  <article data-slug="union-types-and-pattern-matching">
+                  <article data-slug="algebraic-data-types-and-pattern-matching">
             <h2>
-              Union types and pattern matching            </h2>
+              Algebraic data types and pattern matching            </h2>
 
             <div>
-              <p>Union types work pretty much like in Rust.</p>
+              <p>You can define algebraic data types with the <code>enum</code> keyword (pretty much like
+Rust).</p>
 
 <p>Pattern matches must be exhaustive, meaning the compiler will return an error
 when a case is missing (try removing any case statement from the example and see
 what happens!).</p>
 
-<p>Check the
-<a href="https://doc.rust-lang.org/book/ch06-01-defining-an-enum.html">Rust book chapter on enums</a>
-if you want to learn more.</p>
-
 <blockquote class="hint"><p>For now, variants can only be defined as tuples and not as structs.</p>
 </blockquote>            </div>
 
-            <pre data-example="&quot;use fmt;\nuse strings;\n\nenum IpAddr {\n    V4(uint8, uint8, uint8, uint8),\n    V6(string),\n}\n\nfn is_private(ip: IpAddr) -&gt; bool {\n    match ip {\n        IpAddr::V4(a, b, _, _) =&gt; {\n            if a == 10 {\n                return true;\n            }\n\n            if a == 172 &amp;&amp; b &gt;= 16 &amp;&amp; b &lt;= 31 {\n                return true;\n            }\n\n            if a == 192 &amp;&amp; b == 168 {\n                return true;\n            }\n\n            false\n        }\n\n        IpAddr::V6(s) =&gt; strings.HasPrefix(s, \&quot;fc00::\&quot;),\n    }\n}\n\nenum Coin {\n    Penny,\n    Nickel,\n    Dime,\n    Quarter,\n}\n\nfn value_in_cents(coin: Coin) -&gt; int {\n    match coin {\n        Coin::Penny =&gt; 1,\n        Coin::Nickel =&gt; 5,\n        Coin::Dime =&gt; 10,\n        Coin::Quarter =&gt; 25,\n    }\n}\n\nfn main() {\n    let home = IpAddr::V4(127, 0, 0, 1);\n    let loopback = IpAddr::V6(\&quot;::1\&quot;);\n    fmt.Println(\&quot;home ip is private: \&quot;, home, is_private(home));\n    fmt.Println(\&quot;loopback: \&quot;, loopback);\n\n    let cents = value_in_cents(Coin::Nickel);\n    fmt.Println(\&quot;cents:\&quot;, cents);\n}\n&quot;">use fmt;
-use strings;
+            <pre data-example="&quot;use fmt\nuse strings\n\n\nenum IpAddr {\n    V4(uint8, uint8, uint8, uint8),\n    V6(string),\n}\n\nfn is_private(ip: IpAddr) -&gt; bool {\n  match ip {\n    IpAddr.V4(a, b, _, _) =&gt; {\n      if a == 10 {\n        return true\n      }\n\n      if a == 172 &amp;&amp; b &gt;= 16 &amp;&amp; b &lt;= 31 {\n        return true\n      }\n\n      if a == 192 &amp;&amp; b == 168 {\n        return true\n      }\n\n      false\n    }\n\n    IpAddr.V6(s) =&gt; strings.HasPrefix(s, \&quot;fc00::\&quot;)\n  }\n}\n\nenum Coin {\n    Penny,\n    Nickel,\n    Dime,\n    Quarter,\n}\n\nfn value_in_cents(coin: Coin) -&gt; int {\n    match coin {\n        Coin.Penny =&gt; 1,\n        Coin.Nickel =&gt; 5,\n        Coin.Dime =&gt; 10,\n        Coin.Quarter =&gt; 25,\n    }\n}\n\nfn main() {\n  let home = IpAddr.V4(127, 0, 0, 1)\n  let loopback = IpAddr.V6(\&quot;::1\&quot;)\n  fmt.Println(\&quot;home ip is private: \&quot;, home, is_private(home))\n  fmt.Println(\&quot;loopback: \&quot;, loopback)\n\n  let cents = value_in_cents(Coin.Nickel)\n  fmt.Println(\&quot;cents:\&quot;, cents)\n\n}&quot;">use fmt
+use strings
+
 
 enum IpAddr {
     V4(uint8, uint8, uint8, uint8),
@@ -315,25 +308,25 @@ enum IpAddr {
 }
 
 fn is_private(ip: IpAddr) -&gt; bool {
-    match ip {
-        IpAddr::V4(a, b, _, _) =&gt; {
-            if a == 10 {
-                return true;
-            }
+  match ip {
+    IpAddr.V4(a, b, _, _) =&gt; {
+      if a == 10 {
+        return true
+      }
 
-            if a == 172 &amp;&amp; b &gt;= 16 &amp;&amp; b &lt;= 31 {
-                return true;
-            }
+      if a == 172 &amp;&amp; b &gt;= 16 &amp;&amp; b &lt;= 31 {
+        return true
+      }
 
-            if a == 192 &amp;&amp; b == 168 {
-                return true;
-            }
+      if a == 192 &amp;&amp; b == 168 {
+        return true
+      }
 
-            false
-        }
-
-        IpAddr::V6(s) =&gt; strings.HasPrefix(s, &quot;fc00::&quot;),
+      false
     }
+
+    IpAddr.V6(s) =&gt; strings.HasPrefix(s, &quot;fc00::&quot;)
+  }
 }
 
 enum Coin {
@@ -345,23 +338,23 @@ enum Coin {
 
 fn value_in_cents(coin: Coin) -&gt; int {
     match coin {
-        Coin::Penny =&gt; 1,
-        Coin::Nickel =&gt; 5,
-        Coin::Dime =&gt; 10,
-        Coin::Quarter =&gt; 25,
+        Coin.Penny =&gt; 1,
+        Coin.Nickel =&gt; 5,
+        Coin.Dime =&gt; 10,
+        Coin.Quarter =&gt; 25,
     }
 }
 
 fn main() {
-    let home = IpAddr::V4(127, 0, 0, 1);
-    let loopback = IpAddr::V6(&quot;::1&quot;);
-    fmt.Println(&quot;home ip is private: &quot;, home, is_private(home));
-    fmt.Println(&quot;loopback: &quot;, loopback);
+  let home = IpAddr.V4(127, 0, 0, 1)
+  let loopback = IpAddr.V6(&quot;::1&quot;)
+  fmt.Println(&quot;home ip is private: &quot;, home, is_private(home))
+  fmt.Println(&quot;loopback: &quot;, loopback)
 
-    let cents = value_in_cents(Coin::Nickel);
-    fmt.Println(&quot;cents:&quot;, cents);
-}
-</pre>
+  let cents = value_in_cents(Coin.Nickel)
+  fmt.Println(&quot;cents:&quot;, cents)
+
+}</pre>
           </article>
                   <article data-slug="structs">
             <h2>
@@ -370,38 +363,34 @@ fn main() {
             <div>
               <p>Defining and instantiating structs is similar to Rust.</p>
 
-<p>Fields in structs can be modified only if the variable is declared as mutable
-(<code>let mut</code> keyword).</p>
-
 <p>Contrary to Go, all struct fields must be initialized. See the section on <code>nil</code>
 and zero values for more information.</p>
             </div>
 
-            <pre data-example="&quot;use fmt;\n\nstruct Person {\n    name: string,\n    hobbies: [Hobby],\n}\n\nenum Hobby {\n    SkyDiving,\n    StaringAtWall,\n    Other(string),\n}\n\nfn main() {\n    let mut p = Person {\n        name: \&quot;bob\&quot;,\n        hobbies: [Hobby::StaringAtWall, Hobby::Other(\&quot;sleep\&quot;)],\n    };\n\n    fmt.Println(\&quot;person:\&quot;, p);\n\n    p.hobbies = p.hobbies.append(Hobby::SkyDiving);\n    fmt.Println(\&quot;with more hobbies:\&quot;, p);\n}\n&quot;">use fmt;
+            <pre data-example="&quot;use fmt\n\nstruct Person {\n  name: string,\n  hobbies: [Hobby],\n}\n\nenum Hobby {\n  SkyDiving,\n  StaringAtWall,\n  Other(string),\n}\n\nfn main() {\n  let mut p = Person {\n    name: \&quot;bob\&quot;,\n    hobbies: [Hobby.StaringAtWall, Hobby.Other(\&quot;sleep\&quot;)],\n  }\n\n  fmt.Println(\&quot;person:\&quot;, p)\n\n  p.hobbies = p.hobbies.append(Hobby.SkyDiving)\n  fmt.Println(\&quot;with more hobbies:\&quot;, p)\n}&quot;">use fmt
 
 struct Person {
-    name: string,
-    hobbies: [Hobby],
+  name: string,
+  hobbies: [Hobby],
 }
 
 enum Hobby {
-    SkyDiving,
-    StaringAtWall,
-    Other(string),
+  SkyDiving,
+  StaringAtWall,
+  Other(string),
 }
 
 fn main() {
-    let mut p = Person {
-        name: &quot;bob&quot;,
-        hobbies: [Hobby::StaringAtWall, Hobby::Other(&quot;sleep&quot;)],
-    };
+  let mut p = Person {
+    name: &quot;bob&quot;,
+    hobbies: [Hobby.StaringAtWall, Hobby.Other(&quot;sleep&quot;)],
+  }
 
-    fmt.Println(&quot;person:&quot;, p);
+  fmt.Println(&quot;person:&quot;, p)
 
-    p.hobbies = p.hobbies.append(Hobby::SkyDiving);
-    fmt.Println(&quot;with more hobbies:&quot;, p);
-}
-</pre>
+  p.hobbies = p.hobbies.append(Hobby.SkyDiving)
+  fmt.Println(&quot;with more hobbies:&quot;, p)
+}</pre>
           </article>
                   <article data-slug="result-and-option">
             <h2>
@@ -425,42 +414,41 @@ Like in Rust, this is an unsafe operation and will panic.</p>
 the stdlib are welcome!</p>
             </div>
 
-            <pre data-example="&quot;use fmt;\n\nstruct Person {\n    name: string,\n    age: int,\n}\n\nfn validate(name: string, age: int) -&gt; Result&lt;Person, string&gt; {\n    if (age &lt; 18) {\n        return Err(\&quot;too young\&quot;);\n    }\n\n    if (age &gt; 98) {\n        return Err(\&quot;too old\&quot;);\n    }\n\n    Ok(Person { name, age })\n}\n\nfn main() {\n    let xs = [\&quot;a\&quot;, \&quot;b\&quot;, \&quot;c\&quot;];\n    let element = xs.get(2); // Option&lt;string&gt;\n\n    match element {\n        Some(s) =&gt; fmt.Println(\&quot;ok, the element was found:\&quot;, s),\n        None =&gt; fmt.Println(\&quot;element not found\&quot;),\n    }\n\n    let result = validate(\&quot;alice\&quot;, 33); // Result&lt;Person, string&gt;\n\n    match result {\n        Ok(p) =&gt; fmt.Println(\&quot;got a person:\&quot;, p),\n        Err(e) =&gt; fmt.Println(\&quot;couldn&#39;t validate:\&quot;, e),\n    }\n}\n&quot;">use fmt;
+            <pre data-example="&quot;use fmt\n\nstruct Person {\n  name: string,\n  age: int\n}\n\nfn validate(name: string, age: int) -&gt; Result&lt;Person, string&gt; {\n  if (age &lt; 18) {\n    return Err(\&quot;too young\&quot;)\n  }\n\n  if (age &gt; 98) {\n    return Err(\&quot;too old\&quot;)\n  }\n\n  Ok(Person { name, age })\n}\n\nfn main() {\n  let xs = [\&quot;a\&quot;, \&quot;b\&quot;, \&quot;c\&quot;]\n  let element = xs.get(2) // Option&lt;string&gt;\n\n  match element {\n    Some(s) =&gt; fmt.Println(\&quot;ok, the element was found:\&quot;, s),\n    None =&gt; fmt.Println(\&quot;element not found\&quot;),\n  }\n\n  let result = validate(\&quot;alice\&quot;, 33) // Result&lt;Person, string&gt;\n\n  match result {\n    Ok(p) =&gt; fmt.Println(\&quot;got a person:\&quot;, p),\n    Err(e) =&gt; fmt.Println(\&quot;couldn&#39;t validate:\&quot;, e),\n  }\n}&quot;">use fmt
 
 struct Person {
-    name: string,
-    age: int,
+  name: string,
+  age: int
 }
 
 fn validate(name: string, age: int) -&gt; Result&lt;Person, string&gt; {
-    if (age &lt; 18) {
-        return Err(&quot;too young&quot;);
-    }
+  if (age &lt; 18) {
+    return Err(&quot;too young&quot;)
+  }
 
-    if (age &gt; 98) {
-        return Err(&quot;too old&quot;);
-    }
+  if (age &gt; 98) {
+    return Err(&quot;too old&quot;)
+  }
 
-    Ok(Person { name, age })
+  Ok(Person { name, age })
 }
 
 fn main() {
-    let xs = [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;];
-    let element = xs.get(2); // Option&lt;string&gt;
+  let xs = [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;]
+  let element = xs.get(2) // Option&lt;string&gt;
 
-    match element {
-        Some(s) =&gt; fmt.Println(&quot;ok, the element was found:&quot;, s),
-        None =&gt; fmt.Println(&quot;element not found&quot;),
-    }
+  match element {
+    Some(s) =&gt; fmt.Println(&quot;ok, the element was found:&quot;, s),
+    None =&gt; fmt.Println(&quot;element not found&quot;),
+  }
 
-    let result = validate(&quot;alice&quot;, 33); // Result&lt;Person, string&gt;
+  let result = validate(&quot;alice&quot;, 33) // Result&lt;Person, string&gt;
 
-    match result {
-        Ok(p) =&gt; fmt.Println(&quot;got a person:&quot;, p),
-        Err(e) =&gt; fmt.Println(&quot;couldn&#39;t validate:&quot;, e),
-    }
-}
-</pre>
+  match result {
+    Ok(p) =&gt; fmt.Println(&quot;got a person:&quot;, p),
+    Err(e) =&gt; fmt.Println(&quot;couldn&#39;t validate:&quot;, e),
+  }
+}</pre>
           </article>
                   <article data-slug="interoperability-with-go">
             <h2>
@@ -512,11 +500,11 @@ code! All is needed is a package declaration, which is discussed in the next
 section.</p>
             </div>
 
-            <pre data-example="&quot;use fmt;\nuse os;\n\nfn main() {\n    let key = os.LookupEnv(\&quot;HOME\&quot;);\n\n    match key {\n        // Option&lt;T&gt;\n        Some(s) =&gt; fmt.Println(\&quot;home dir:\&quot;, s),\n        None =&gt; fmt.Println(\&quot;Not found in env\&quot;),\n    }\n\n    let info = os.Stat(\&quot;file-does-not-exist\&quot;);\n\n    match info {\n        // Result&lt;T, E&gt;\n        Ok(_) =&gt; fmt.Println(\&quot;The file exists\&quot;),\n        Err(err) =&gt; fmt.Println(\&quot;Got error reading file\&quot;, err),\n    }\n}\n&quot;">use fmt;
-use os;
+            <pre data-example="&quot;use fmt\nuse os\n\nfn main() {\n    let key = os.LookupEnv(\&quot;HOME\&quot;)\n\n    match key {\n        // Option&lt;T&gt;\n        Some(s) =&gt; fmt.Println(\&quot;home dir:\&quot;, s),\n        None =&gt; fmt.Println(\&quot;Not found in env\&quot;),\n    }\n\n    let info = os.Stat(\&quot;file-does-not-exist\&quot;)\n\n    match info {\n        // Result&lt;T, E&gt;\n        Ok(_) =&gt; fmt.Println(\&quot;The file exists\&quot;),\n        Err(err) =&gt; fmt.Println(\&quot;Got error reading file\&quot;, err),\n    }\n}&quot;">use fmt
+use os
 
 fn main() {
-    let key = os.LookupEnv(&quot;HOME&quot;);
+    let key = os.LookupEnv(&quot;HOME&quot;)
 
     match key {
         // Option&lt;T&gt;
@@ -524,15 +512,14 @@ fn main() {
         None =&gt; fmt.Println(&quot;Not found in env&quot;),
     }
 
-    let info = os.Stat(&quot;file-does-not-exist&quot;);
+    let info = os.Stat(&quot;file-does-not-exist&quot;)
 
     match info {
         // Result&lt;T, E&gt;
         Ok(_) =&gt; fmt.Println(&quot;The file exists&quot;),
         Err(err) =&gt; fmt.Println(&quot;Got error reading file&quot;, err),
     }
-}
-</pre>
+}</pre>
           </article>
                   <article data-slug="package-definitions">
             <h2>
@@ -552,13 +539,13 @@ The relevant bindings are defined in <code>std/regexp/regexp.brg</code> (here&#3
 
 <pre><code>struct Regexp { }
 
-fn Compile  (expr: string) -&gt; Result&lt;&amp;Regexp&gt; { EXT }
+fn Compile  (expr: string) -&gt; Result&lt;*Regexp&gt; { EXT }
 
-fn CompilePOSIX  (expr: string) -&gt; Result&lt;&amp;Regexp&gt; { EXT }
+fn CompilePOSIX  (expr: string) -&gt; Result&lt;*Regexp&gt; { EXT }
 
-fn MustCompile  (str: string) -&gt; &amp;Regexp { EXT }
+fn MustCompile  (str: string) -&gt; *Regexp { EXT }
 
-fn MustCompilePOSIX  (str: string) -&gt; &amp;Regexp { EXT }
+fn MustCompilePOSIX  (str: string) -&gt; *Regexp { EXT }
 
 fn Match  (pattern: string, b: [byte]) -&gt; Result&lt;bool&gt; { EXT }
 
@@ -568,81 +555,52 @@ fn Match  (pattern: string, b: [byte]) -&gt; Result&lt;bool&gt; { EXT }
 <p>Writing such declarations by hand is a pain! There&#39;s no reason why this process
 couldn&#39;t be automated though. The compiler comes with an <code>importer</code> tool that
 parses a Go package and generates corresponding bindings to be used in Borgo.</p>
-
-<p>To run the importer on any package in the stdlib, you can use something like the
-following:</p>
-
-<pre><code>just run-importer -folder $(go env GOROOT)/src/regexp &gt; std/regexp/regexp.brg
-</code></pre>
-
-<p>All packages also need to be listed in
-<a href="https://github.com/borgo-lang/borgo/tree/main/std/modules.json">std/modules.json</a>
-for now.</p>
             </div>
 
-            <pre data-example="&quot;use fmt;\nuse regexp;\n\nfn main() {\n    let validID = regexp.MustCompile(r\&quot;^[a-z]+\\[[0-9]+\\]$\&quot;);\n\n    fmt.Println(validID.MatchString(\&quot;adam[23]\&quot;));\n    fmt.Println(validID.MatchString(\&quot;eve[7]\&quot;));\n}\n&quot;">use fmt;
-use regexp;
+            <pre data-example="&quot;use fmt\nuse regexp\n\nfn main() {\n  let validID = regexp.MustCompile(\&quot;^[a-z]+[[0-9]+]$\&quot;)\n\n  fmt.Println(validID.MatchString(\&quot;adam[23]\&quot;))\n  fmt.Println(validID.MatchString(\&quot;eve[7]\&quot;))\n}&quot;">use fmt
+use regexp
 
 fn main() {
-    let validID = regexp.MustCompile(r&quot;^[a-z]+\[[0-9]+\]$&quot;);
+  let validID = regexp.MustCompile(&quot;^[a-z]+[[0-9]+]$&quot;)
 
-    fmt.Println(validID.MatchString(&quot;adam[23]&quot;));
-    fmt.Println(validID.MatchString(&quot;eve[7]&quot;));
-}
-</pre>
+  fmt.Println(validID.MatchString(&quot;adam[23]&quot;))
+  fmt.Println(validID.MatchString(&quot;eve[7]&quot;))
+}</pre>
           </article>
                   <article data-slug="pointers-and-references">
             <h2>
               Pointers and References            </h2>
 
             <div>
-              <p><strong>NOTE</strong> Right now this is more wishful thinking than anything :D I plan to
-implement an extra pass in the compiler pipeline that can check if references
-are handed out correctly, but <strong>right now you can pass around references of any
-type and not get an error</strong>.</p>
+              <p>Pointers and References work the same as in Go.</p>
 
-<p>Borgo dosn&#39;t have a borrow checker: all memory is managed by the Go runtime.
-That&#39;s one of the main benefits of compiling to Go after all!</p>
+<p>To dereference a pointer, use <code>foo.*</code> instead of <code>*foo</code> (like in Zig).</p>
+            </div>
 
-<p>Despite that, when handing out a <em>reference</em> of a value to a function, it is
-still useful to be explicit about whether the reference is <em>mutable</em> or
-<em>immutable</em>.</p>
+            <pre data-example="&quot;use fmt\n\nstruct Foo {\n    bar: int\n}\n\nstruct Bar {\n    foo: *Foo\n}\n\nfn main() {\n    let mut f = Foo { bar: 0 }\n    let b = Bar { foo: &amp;f }\n\n    f.bar = 99\n\n    fmt.Println(b.foo)\n\n    // pointer dereference\n    // In Go, this would be:   *b.foo = ...\n    b.foo.* = Foo { bar: 23 }\n\n    fmt.Println(b.foo)\n}&quot;">use fmt
 
-<p>Borgo distinguishes between:</p>
-
-<ul>
-<li><code>&amp;mut T</code> references, which allow modification of the underlying value</li>
-<li><code>&amp;T</code> references, which are read-only and ensure no changes will occur</li>
-</ul>
-
-<p>So for example, a function that computes the sum of a slice of ints, has no need
-to mutate it. It makes sense to accept a read-only reference.</p>
-
-<pre><code>fn sum(xs: &amp;[int]) -&gt; int {
-  // ...
+struct Foo {
+    bar: int
 }
-</code></pre>
 
-<p>Whereas if we wanted to add elements to it, then we&#39;d need a mutable reference.</p>
-
-<pre><code>fn add_number(xs: &amp;mut [int], n: int) {
-  // ...
+struct Bar {
+    foo: *Foo
 }
-</code></pre>
 
-<p>When generating Go code, this makes no difference, it&#39;s all pointers under the
-hood!</p>
+fn main() {
+    let mut f = Foo { bar: 0 }
+    let b = Bar { foo: &amp;f }
 
-<blockquote class="hint"><p>Because there&#39;s no borrow checker involved, it makes less sense to talk about
-<em>exclusive</em> and <em>shared</em> references. It&#39;s perfectly valid to have multiple
-mutable references live at the same point, something that would not be permitted
-by Rust&#39;s ownership rules.</p>
-</blockquote>            </div>
+    f.bar = 99
 
-            <pre data-example="&quot;// example missing,\n\nfn main() {}\n&quot;">// example missing,
+    fmt.Println(b.foo)
 
-fn main() {}
-</pre>
+    // pointer dereference
+    // In Go, this would be:   *b.foo = ...
+    b.foo.* = Foo { bar: 23 }
+
+    fmt.Println(b.foo)
+}</pre>
           </article>
                   <article data-slug="methods">
             <h2>
@@ -651,57 +609,57 @@ fn main() {}
             <div>
               <p>To define methods on types, you can use <code>impl {}</code> blocks.</p>
 
-<p>Methods need a <code>self</code> receiver, like in Rust. If the receiver is <code>&amp;mut self</code> or
-<code>&amp;self</code> then the generated method will be a pointer receiver <code>(self *T)</code> in the
-final Go output.</p>
+<p>In Go, the method receiver must be specified at each function declaration. In
+Borgo, this is specified only once at the beginning of the <code>impl</code> block
+(<code>p: *Person</code>). All functions within the block will have that receiver.</p>
 
-<p>It&#39;s also possible to declare static methods: they will compile to normal
-functions namespaced with the type name (ie. <code>Person_new()</code>).</p>
+<p>It&#39;s also possible to declare static methods: functions can be declared with
+dots in their name, so you can define a <code>Person.new</code> function like in the
+example.</p>
             </div>
 
-            <pre data-example="&quot;use fmt;\n\nstruct Person {\n    name: string,\n    hours_slept: int,\n}\n\nimpl Person {\n    fn new(name: string) -&gt; Person {\n        Person {\n            name,\n            hours_slept: 0,\n        }\n    }\n\n    // Needs mutable reference because modifies structure\n    fn sleep(&amp;mut self) {\n        self.hours_slept = self.hours_slept + 1;\n    }\n\n    // Ok with read-only reference\n    fn ready_for_work(&amp;self) -&gt; bool {\n        self.hours_slept &gt; 5\n    }\n\n    fn ready_to_party(&amp;self) -&gt; bool {\n        self.hours_slept &gt; 10\n    }\n}\n\nfn main() {\n    let mut p = Person::new(\&quot;alice\&quot;);\n\n    p.sleep();\n    p.sleep();\n\n    fmt.Println(\&quot;is ready:\&quot;, p.ready_for_work());\n}\n&quot;">use fmt;
+            <pre data-example="&quot;use fmt\n\nstruct Person {\n  name: string,\n  hours_slept: int,\n}\n\nfn Person.new(name: string) -&gt; Person {\n    Person {\n      name,\n      hours_slept: 0,\n    }\n}\n\nimpl (p: *Person) {\n  // Needs mutable reference because modifies structure\n  fn sleep() {\n    p.hours_slept = p.hours_slept + 1 \n  }\n\n  // Ok with read-only reference\n  fn ready_for_work() -&gt; bool {\n    p.hours_slept &gt; 5\n  }\n\n  fn ready_to_party() -&gt; bool {\n    p.hours_slept &gt; 10\n  }\n}\n\nfn main() {\n  let mut p = Person.new(\&quot;alice\&quot;)\n\n  p.sleep()\n  p.sleep()\n\n  fmt.Println(\&quot;is ready:\&quot;, p.ready_for_work())\n}&quot;">use fmt
 
 struct Person {
-    name: string,
-    hours_slept: int,
+  name: string,
+  hours_slept: int,
 }
 
-impl Person {
-    fn new(name: string) -&gt; Person {
-        Person {
-            name,
-            hours_slept: 0,
-        }
+fn Person.new(name: string) -&gt; Person {
+    Person {
+      name,
+      hours_slept: 0,
     }
+}
 
-    // Needs mutable reference because modifies structure
-    fn sleep(&amp;mut self) {
-        self.hours_slept = self.hours_slept + 1;
-    }
+impl (p: *Person) {
+  // Needs mutable reference because modifies structure
+  fn sleep() {
+    p.hours_slept = p.hours_slept + 1 
+  }
 
-    // Ok with read-only reference
-    fn ready_for_work(&amp;self) -&gt; bool {
-        self.hours_slept &gt; 5
-    }
+  // Ok with read-only reference
+  fn ready_for_work() -&gt; bool {
+    p.hours_slept &gt; 5
+  }
 
-    fn ready_to_party(&amp;self) -&gt; bool {
-        self.hours_slept &gt; 10
-    }
+  fn ready_to_party() -&gt; bool {
+    p.hours_slept &gt; 10
+  }
 }
 
 fn main() {
-    let mut p = Person::new(&quot;alice&quot;);
+  let mut p = Person.new(&quot;alice&quot;)
 
-    p.sleep();
-    p.sleep();
+  p.sleep()
+  p.sleep()
 
-    fmt.Println(&quot;is ready:&quot;, p.ready_for_work());
-}
-</pre>
+  fmt.Println(&quot;is ready:&quot;, p.ready_for_work())
+}</pre>
           </article>
-                  <article data-slug="interfaces-traits">
+                  <article data-slug="interfaces">
             <h2>
-              Interfaces (traits)            </h2>
+              Interfaces            </h2>
 
             <div>
               <p>Interfaces in Borgo work the same as in Go, it&#39;s all duck typing.</p>
@@ -710,30 +668,24 @@ fn main() {
 instance of that interface.</p>
 
 <p>Embedded interfaces are also supported, just list out the other interfaces
-<em>implied</em> by the one being defined. For example, the <code>ReadWriter</code> interface from
-the <code>io</code> package can be defined as:</p>
+<em>implied</em> by the one being defined (prefixed by <code>impl</code>). For example, the
+<code>ReadWriter</code> interface from the <code>io</code> package can be defined as:</p>
 
-<pre><code>trait ReadWriter: Reader + Writer {}
+<pre><code>interface ReadWriter {
+    impl Reader
+    impl Writer
+}
 </code></pre>
 
-<p>One possibly confusing detail is that Borgo uses the <code>trait</code> keyword to define
-interfaces ^_^&#39;.</p>
-
-<p>This is because the underlying parser is looking for Rust syntax. In the future
-we&#39;ll have our own parser (or more realistically just a fork) and this will no
-longer be a problem!</p>
-
-<blockquote class="hint"><p>Borgo doesn&#39;t support <a href="https://go.dev/ref/spec#General_interfaces">type sets</a>,
-you can only define methods in interfaces. Constraints still work, but they will
-only be checked by the Go compiler.</p>
+<blockquote class="hint"><p><a href="https://go.dev/ref/spec#General_interfaces">type sets</a> are not supported.</p>
 </blockquote>            </div>
 
-            <pre data-example="&quot;use fmt;\nuse math;\n\ntrait geometry {\n    fn area() -&gt; float64;\n    fn perim() -&gt; float64;\n}\n\nstruct rect {\n    width: float64,\n    height: float64,\n}\n\nimpl rect {\n    fn area(self) -&gt; float64 {\n        self.width * self.height\n    }\n\n    fn perim(self) -&gt; float64 {\n        2 * self.width + 2 * self.height\n    }\n}\n\nstruct circle {\n    radius: float64,\n}\n\nimpl circle {\n    fn area(self) -&gt; float64 {\n        math.Pi * self.radius * self.radius\n    }\n\n    fn perim(self) -&gt; float64 {\n        2 * math.Pi * self.radius\n    }\n}\n\nfn measure(g: geometry) {\n    fmt.Println(g);\n    fmt.Println(g.area());\n    fmt.Println(g.perim());\n}\n\nfn main() {\n    let r = rect {\n        width: 3,\n        height: 4,\n    };\n    let c = circle { radius: 5 };\n\n    measure(r);\n    measure(c);\n}\n&quot;">use fmt;
-use math;
+            <pre data-example="&quot;use fmt\nuse math\n\ninterface geometry {\n    fn area() -&gt; float64\n    fn perim() -&gt; float64\n}\n\nstruct rect {\n    width: float64,\n    height: float64,\n}\n\nimpl (r: rect) {\n    fn area() -&gt; float64 {\n        r.width * r.height\n    }\n\n    fn perim() -&gt; float64 {\n        2 * r.width + 2 * r.height\n    }\n}\n\nstruct circle {\n    radius: float64,\n}\n\nimpl (c: circle) {\n    fn area() -&gt; float64 {\n        math.Pi * c.radius * c.radius\n    }\n\n    fn perim() -&gt; float64 {\n        2 * math.Pi * c.radius\n    }\n}\n\nfn measure(g: geometry) {\n    fmt.Println(g)\n    fmt.Println(g.area())\n    fmt.Println(g.perim())\n}\n\nfn main() {\n    let r = rect {\n        width: 3,\n        height: 4,\n    }\n    let c = circle { radius: 5 }\n\n    measure(r)\n    measure(c)\n}&quot;">use fmt
+use math
 
-trait geometry {
-    fn area() -&gt; float64;
-    fn perim() -&gt; float64;
+interface geometry {
+    fn area() -&gt; float64
+    fn perim() -&gt; float64
 }
 
 struct rect {
@@ -741,13 +693,13 @@ struct rect {
     height: float64,
 }
 
-impl rect {
-    fn area(self) -&gt; float64 {
-        self.width * self.height
+impl (r: rect) {
+    fn area() -&gt; float64 {
+        r.width * r.height
     }
 
-    fn perim(self) -&gt; float64 {
-        2 * self.width + 2 * self.height
+    fn perim() -&gt; float64 {
+        2 * r.width + 2 * r.height
     }
 }
 
@@ -755,33 +707,32 @@ struct circle {
     radius: float64,
 }
 
-impl circle {
-    fn area(self) -&gt; float64 {
-        math.Pi * self.radius * self.radius
+impl (c: circle) {
+    fn area() -&gt; float64 {
+        math.Pi * c.radius * c.radius
     }
 
-    fn perim(self) -&gt; float64 {
-        2 * math.Pi * self.radius
+    fn perim() -&gt; float64 {
+        2 * math.Pi * c.radius
     }
 }
 
 fn measure(g: geometry) {
-    fmt.Println(g);
-    fmt.Println(g.area());
-    fmt.Println(g.perim());
+    fmt.Println(g)
+    fmt.Println(g.area())
+    fmt.Println(g.perim())
 }
 
 fn main() {
     let r = rect {
         width: 3,
         height: 4,
-    };
-    let c = circle { radius: 5 };
+    }
+    let c = circle { radius: 5 }
 
-    measure(r);
-    measure(c);
-}
-</pre>
+    measure(r)
+    measure(c)
+}</pre>
           </article>
                   <article data-slug="error-handling">
             <h2>
@@ -799,41 +750,41 @@ in the Rust book .</p>
 also work with <code>Option</code>.</p>
             </div>
 
-            <pre data-example="&quot;use fmt;\nuse io;\nuse os;\n\nfn copy_file(src: string, dst: string) -&gt; Result&lt;(), error&gt; {\n    let stat = os.Stat(src)?;\n\n    if !stat.Mode().IsRegular() {\n        return Err(fmt.Errorf(\&quot;%s is not a regular file\&quot;, src));\n    }\n\n    let source = os.Open(src)?;\n    defer!(source.Close());\n\n    let destination = os.Create(dst)?;\n    defer!(destination.Close());\n\n    // ignore number of bytes copied\n    let _ = io.Copy(destination, source)?;\n\n    Ok(())\n}\n\nfn copy_all_files(folder: string) -&gt; Result&lt;int, error&gt; {\n    let mut n = 0;\n\n    for f in os.ReadDir(folder)? {\n        if !f.IsDir() {\n            let original = f.Name();\n            let new_name = fmt.Sprintf(\&quot;%s-copy\&quot;, original);\n\n            fmt.Println(\&quot;copying\&quot;, original, \&quot;to\&quot;, new_name);\n\n            copy_file(original, new_name)?;\n            n = n + 1;\n        }\n    }\n\n    Ok(n)\n}\n\nfn main() {\n    match copy_all_files(\&quot;.\&quot;) {\n        Ok(n) =&gt; fmt.Println(n, \&quot;files copied\&quot;),\n        Err(err) =&gt; fmt.Println(\&quot;Got error:\&quot;, err),\n    }\n}\n&quot;">use fmt;
-use io;
-use os;
+            <pre data-example="&quot;use fmt\nuse io\nuse os\n\nfn copy_file(src: string, dst: string) -&gt; Result&lt;(), error&gt; {\n    let stat = os.Stat(src)?\n\n    if !stat.Mode().IsRegular() {\n        return Err(fmt.Errorf(\&quot;%s is not a regular file\&quot;, src))\n    }\n\n    let source = os.Open(src)?\n    defer source.Close()\n\n    let destination = os.Create(dst)?\n    defer destination.Close()\n\n    // ignore number of bytes copied\n    let _ = io.Copy(destination, source)?\n\n    Ok(())\n}\n\nfn copy_all_files(folder: string) -&gt; Result&lt;int, error&gt; {\n    let mut n = 0\n\n    for f in os.ReadDir(folder)? {\n        if !f.IsDir() {\n            let original = f.Name()\n            let new_name = fmt.Sprintf(\&quot;%s-copy\&quot;, original)\n\n            fmt.Println(\&quot;copying\&quot;, original, \&quot;to\&quot;, new_name)\n\n            copy_file(original, new_name)?\n            n = n + 1\n        }\n    }\n\n    Ok(n)\n}\n\nfn main() {\n    match copy_all_files(\&quot;.\&quot;) {\n        Ok(n) =&gt; fmt.Println(n, \&quot;files copied\&quot;),\n        Err(err) =&gt; fmt.Println(\&quot;Got error:\&quot;, err),\n    }\n}&quot;">use fmt
+use io
+use os
 
 fn copy_file(src: string, dst: string) -&gt; Result&lt;(), error&gt; {
-    let stat = os.Stat(src)?;
+    let stat = os.Stat(src)?
 
     if !stat.Mode().IsRegular() {
-        return Err(fmt.Errorf(&quot;%s is not a regular file&quot;, src));
+        return Err(fmt.Errorf(&quot;%s is not a regular file&quot;, src))
     }
 
-    let source = os.Open(src)?;
-    defer!(source.Close());
+    let source = os.Open(src)?
+    defer source.Close()
 
-    let destination = os.Create(dst)?;
-    defer!(destination.Close());
+    let destination = os.Create(dst)?
+    defer destination.Close()
 
     // ignore number of bytes copied
-    let _ = io.Copy(destination, source)?;
+    let _ = io.Copy(destination, source)?
 
     Ok(())
 }
 
 fn copy_all_files(folder: string) -&gt; Result&lt;int, error&gt; {
-    let mut n = 0;
+    let mut n = 0
 
     for f in os.ReadDir(folder)? {
         if !f.IsDir() {
-            let original = f.Name();
-            let new_name = fmt.Sprintf(&quot;%s-copy&quot;, original);
+            let original = f.Name()
+            let new_name = fmt.Sprintf(&quot;%s-copy&quot;, original)
 
-            fmt.Println(&quot;copying&quot;, original, &quot;to&quot;, new_name);
+            fmt.Println(&quot;copying&quot;, original, &quot;to&quot;, new_name)
 
-            copy_file(original, new_name)?;
-            n = n + 1;
+            copy_file(original, new_name)?
+            n = n + 1
         }
     }
 
@@ -845,8 +796,7 @@ fn main() {
         Ok(n) =&gt; fmt.Println(n, &quot;files copied&quot;),
         Err(err) =&gt; fmt.Println(&quot;Got error:&quot;, err),
     }
-}
-</pre>
+}</pre>
           </article>
                   <article data-slug="zero-values-and-nil">
             <h2>
@@ -862,7 +812,7 @@ types like <code>Option&lt;T&gt;</code>. Borgo tries to do the same.</p>
 <p>You can still end up with null pointers if you&#39;re calling into existing Go code,
 which is unfortunate. That should be solvable by writing better bindings, so
 that functions that could return a null pointer, will instead return an
-<code>Option&lt;&amp;T&gt;</code>, forcing you to handle all cases.</p>
+<code>Option&lt;*T&gt;</code>, forcing you to handle all cases.</p>
 
 <p>In Go, it&#39;s common to see types not needing to be initialized, as their <em>zero
 value</em> is ready to be used (ie. <code>sync.Mutex</code> or <code>sync.WaitGroup</code>). Borgo goes in
@@ -877,22 +827,21 @@ are initialized with <code>zero_value()</code>.</p>
 always need to be initialized.</p>
             </div>
 
-            <pre data-example="&quot;use bytes;\nuse fmt;\nuse sync;\n\nfn main() {\n    // in Go:\n    // var wg sync.WaitGroup\n    let wg: sync::WaitGroup = zero_value();\n\n    // in Go:\n    // var b bytes.Buffer\n    let b: bytes::Buffer = zero_value();\n\n    fmt.Println(\&quot;variables are initialized:\&quot;, wg, b);\n}\n&quot;">use bytes;
-use fmt;
-use sync;
+            <pre data-example="&quot;use sync\nuse bytes\nuse fmt\n\nfn main() {\n     // in Go:\n     // var wg sync.WaitGroup\n     let wg: sync.WaitGroup = zero_value()\n\n     // in Go:\n     // var b bytes.Buffer\n     let b: bytes.Buffer = zero_value()\n\n     fmt.Println(\&quot;variables are initialized:\&quot;, wg, b)\n}&quot;">use sync
+use bytes
+use fmt
 
 fn main() {
-    // in Go:
-    // var wg sync.WaitGroup
-    let wg: sync::WaitGroup = zero_value();
+     // in Go:
+     // var wg sync.WaitGroup
+     let wg: sync.WaitGroup = zero_value()
 
-    // in Go:
-    // var b bytes.Buffer
-    let b: bytes::Buffer = zero_value();
+     // in Go:
+     // var b bytes.Buffer
+     let b: bytes.Buffer = zero_value()
 
-    fmt.Println(&quot;variables are initialized:&quot;, wg, b);
-}
-</pre>
+     fmt.Println(&quot;variables are initialized:&quot;, wg, b)
+}</pre>
           </article>
                   <article data-slug="concurrency-goroutines">
             <h2>
@@ -901,61 +850,56 @@ fn main() {
             <div>
               <p>Borgo aims to support all concurrency primitives available in Go.</p>
 
-<p>You can use <code>spawn!()</code> to start a goroutine. The parameter needs to be a
-function call. If you&#39;re passing in a lambda, make sure you wrap it in extra
-parens before invoking it, or the parser would fail to recognize it as a
-function call.</p>
+<p>Use the <code>spawn</code> keyword (instead of <code>go</code>) to start a goroutine. The parameter
+needs to be a function call.</p>
 
 <p>Channels and <code>select {}</code> statements are discussed next.</p>
             </div>
 
-            <pre data-example="&quot;use fmt;\nuse sync;\n\nstruct Counter {\n    count: int,\n    mu: sync::Mutex,\n}\n\nimpl Counter {\n    fn New() -&gt; Counter {\n        Counter {\n            count: 0,\n            mu: zero_value(),\n        }\n    }\n\n    fn Inc(&amp;mut self) {\n        self.mu.Lock();\n        self.count = self.count + 1;\n        self.mu.Unlock();\n    }\n}\n\nfn main() {\n    let desired = 1000;\n    let counter = Counter::New();\n\n    let wg: sync::WaitGroup = zero_value();\n    wg.Add(desired);\n\n    let mut i = 0;\n\n    while (i &lt; desired) {\n        // equivalent to:   go func() { ... }()\n        spawn!((|| {\n            counter.Inc();\n            wg.Done();\n        })());\n\n        i = i + 1;\n    }\n\n    wg.Wait();\n\n    fmt.Println(\&quot;Counter value:\&quot;, counter.count);\n}\n&quot;">use fmt;
-use sync;
+            <pre data-example="&quot;use sync\nuse fmt\n\nstruct Counter {\n    count: int,\n    mu: sync.Mutex,\n}\n\nfn Counter.new() -&gt; Counter {\n    Counter { count: 0, mu: zero_value() }\n}\n\nimpl (c: *Counter) {\n    fn Inc() {\n       c.mu.Lock() \n       c.count = c.count + 1\n       c.mu.Unlock() \n    }\n}\n\nfn main() {\n    let desired = 1000\n    let counter = Counter.new()\n\n    let wg: sync.WaitGroup = zero_value()\n    wg.Add(desired)\n\n    let mut i = 0\n\n    while (i &lt; desired) {\n\n        // equivalent to:   go func() { ... }()\n        spawn (|| {\n            counter.Inc()\n            wg.Done()\n        })()\n\n        i = i + 1\n    }\n\n    wg.Wait()\n\n    fmt.Println(\&quot;Counter value:\&quot;, counter.count)\n}&quot;">use sync
+use fmt
 
 struct Counter {
     count: int,
-    mu: sync::Mutex,
+    mu: sync.Mutex,
 }
 
-impl Counter {
-    fn New() -&gt; Counter {
-        Counter {
-            count: 0,
-            mu: zero_value(),
-        }
-    }
+fn Counter.new() -&gt; Counter {
+    Counter { count: 0, mu: zero_value() }
+}
 
-    fn Inc(&amp;mut self) {
-        self.mu.Lock();
-        self.count = self.count + 1;
-        self.mu.Unlock();
+impl (c: *Counter) {
+    fn Inc() {
+       c.mu.Lock() 
+       c.count = c.count + 1
+       c.mu.Unlock() 
     }
 }
 
 fn main() {
-    let desired = 1000;
-    let counter = Counter::New();
+    let desired = 1000
+    let counter = Counter.new()
 
-    let wg: sync::WaitGroup = zero_value();
-    wg.Add(desired);
+    let wg: sync.WaitGroup = zero_value()
+    wg.Add(desired)
 
-    let mut i = 0;
+    let mut i = 0
 
     while (i &lt; desired) {
-        // equivalent to:   go func() { ... }()
-        spawn!((|| {
-            counter.Inc();
-            wg.Done();
-        })());
 
-        i = i + 1;
+        // equivalent to:   go func() { ... }()
+        spawn (|| {
+            counter.Inc()
+            wg.Done()
+        })()
+
+        i = i + 1
     }
 
-    wg.Wait();
+    wg.Wait()
 
-    fmt.Println(&quot;Counter value:&quot;, counter.count);
-}
-</pre>
+    fmt.Println(&quot;Counter value:&quot;, counter.count)
+}</pre>
           </article>
                   <article data-slug="channels">
             <h2>
@@ -964,7 +908,7 @@ fn main() {
             <div>
               <p>Borgo doesn&#39;t provide any extra syntax to send/receive from channels.</p>
 
-<p>You use <code>Channel::new()</code> to create a <code>Sender&lt;T&gt;</code> and <code>Receiver&lt;T&gt;</code>.These are
+<p>You use <code>Channel.new()</code> to create a <code>Sender&lt;T&gt;</code> and <code>Receiver&lt;T&gt;</code>.These are
 roughly equivalent to send-only and receive-only channels in Go and will compile
 to raw channels in the final Go output.</p>
 
@@ -975,64 +919,62 @@ to raw channels in the final Go output.</p>
 standard library.</p>
             </div>
 
-            <pre data-example="&quot;use fmt;\n\nfn main() {\n    let (sender, receiver) = Channel::new();\n\n    spawn!((|| { sender.send(1) })());\n\n    spawn!((|| { sender.send(2) })());\n\n    let msg = receiver.recv();\n    let msg2 = receiver.recv();\n\n    fmt.Println(msg + msg2);\n}\n&quot;">use fmt;
+            <pre data-example="&quot;use fmt\n\nfn main() {\n    let (sender, receiver) = Channel.new()\n\n    spawn (|| {\n        sender.send(1)\n    })()\n\n    spawn (|| {\n        sender.send(2)\n    })()\n\n    let msg = receiver.recv()\n    let msg2 = receiver.recv()\n\n    fmt.Println(msg + msg2)\n}&quot;">use fmt
 
 fn main() {
-    let (sender, receiver) = Channel::new();
+    let (sender, receiver) = Channel.new()
 
-    spawn!((|| { sender.send(1) })());
+    spawn (|| {
+        sender.send(1)
+    })()
 
-    spawn!((|| { sender.send(2) })());
+    spawn (|| {
+        sender.send(2)
+    })()
 
-    let msg = receiver.recv();
-    let msg2 = receiver.recv();
+    let msg = receiver.recv()
+    let msg2 = receiver.recv()
 
-    fmt.Println(msg + msg2);
-}
-</pre>
+    fmt.Println(msg + msg2)
+}</pre>
           </article>
                   <article data-slug="select-statements">
             <h2>
               Select statements            </h2>
 
             <div>
-              <p>There&#39;s no first class support for <code>select {}</code> statements, although you can
-still use them with a bit of a hacky workaround.</p>
+              <p>There&#39;s no first class support for <code>select {}</code> statements yet. still use them
+with a bit of a hacky workaround.</p>
 
-<p>Borgo allows you to embed <em>raw</em> Go code by calling the <code>rawgo!()</code> function,
-passing in a string of valid Go code. This isn&#39;t type checked or analyzed in any
-way, but it can be used as a last resort escape hatch when the compiler
-implementation falls short (like for <code>select {}</code>).</p>
+<p>You can get around this by using <code>rawgo</code> which lets you embed raw Go code.
+First-class support for <code>select</code> statements will be available soon.</p>
             </div>
 
-            <pre data-example="&quot;use fmt;\nuse time;\n\nfn main() {\n    let (tx1, rx1) = Channel::new();\n    let (tx2, rx2) = Channel::new();\n\n    spawn!((|| {\n        tx1.send(\&quot;a\&quot;);\n    })());\n\n    spawn!((|| {\n        time.Sleep(2 * time.Second);\n        tx2.send(\&quot;b\&quot;);\n    })());\n\n    rawgo!(\n        \&quot;\n        select {\n            case a := &lt;-rx1:\n                fmt.Println(\\\&quot;got\\\&quot;, a)\n            case b := &lt;-rx2:\n                fmt.Println(\\\&quot;got\\\&quot;, b)\n        }\n    \&quot;\n    );\n}\n&quot;">use fmt;
-use time;
+            <pre data-example="&quot;use fmt\nuse time\n\nfn main() {\n    let (tx1, rx1) = Channel.new()\n    let (tx2, rx2) = Channel.new()\n\n    spawn (|| {\n        tx1.send(\&quot;a\&quot;)\n    })()\n\n    spawn (|| {\n        time.Sleep(2 * time.Second)\n        tx2.send(\&quot;b\&quot;)\n    })()\n\n    @rawgo (\n        \\\\ select {\n        \\\\   case a := &lt;-rx1:\n        \\\\     fmt.Println(\&quot;got\&quot;, a)\n        \\\\   case b := &lt;-rx2:\n        \\\\     fmt.Println(\&quot;got\&quot;, b)\n        \\\\ }\n    )\n}&quot;">use fmt
+use time
 
 fn main() {
-    let (tx1, rx1) = Channel::new();
-    let (tx2, rx2) = Channel::new();
+    let (tx1, rx1) = Channel.new()
+    let (tx2, rx2) = Channel.new()
 
-    spawn!((|| {
-        tx1.send(&quot;a&quot;);
-    })());
+    spawn (|| {
+        tx1.send(&quot;a&quot;)
+    })()
 
-    spawn!((|| {
-        time.Sleep(2 * time.Second);
-        tx2.send(&quot;b&quot;);
-    })());
+    spawn (|| {
+        time.Sleep(2 * time.Second)
+        tx2.send(&quot;b&quot;)
+    })()
 
-    rawgo!(
-        &quot;
-        select {
-            case a := &lt;-rx1:
-                fmt.Println(\&quot;got\&quot;, a)
-            case b := &lt;-rx2:
-                fmt.Println(\&quot;got\&quot;, b)
-        }
-    &quot;
-    );
-}
-</pre>
+    @rawgo (
+        \\ select {
+        \\   case a := &lt;-rx1:
+        \\     fmt.Println(&quot;got&quot;, a)
+        \\   case b := &lt;-rx2:
+        \\     fmt.Println(&quot;got&quot;, b)
+        \\ }
+    )
+}</pre>
           </article>
             </section>
 
