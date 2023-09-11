@@ -942,37 +942,66 @@ fn main() {
               Select statements            </h2>
 
             <div>
-              <p>There&#39;s no first class support for <code>select {}</code> statements yet. still use them
-with a bit of a hacky workaround.</p>
+              <p><code>select {}</code> works like in Go, however the syntax is slightly different.</p>
 
-<p>You can get around this by using <code>rawgo</code> which lets you embed raw Go code.
-First-class support for <code>select</code> statements will be available soon.</p>
+<pre><code>Reading from a channel
+
+Go:    case x := &lt;- ch
+Borgo: let x = ch.Recv() 
+
+
+Sending to a channel
+
+Go:    case ch &lt;- x
+Borgo: ch.Send(x) 
+
+Default case
+
+Go:    default
+Borgo: _
+</code></pre>
             </div>
 
-            <pre data-example="&quot;use fmt\nuse time\n\nfn main() {\n    let (tx1, rx1) = Channel.new()\n    let (tx2, rx2) = Channel.new()\n\n    spawn (|| {\n        tx1.Send(\&quot;a\&quot;)\n    })()\n\n    spawn (|| {\n        time.Sleep(2 * time.Second)\n        tx2.Send(\&quot;b\&quot;)\n    })()\n\n    @rawgo (\n        \\\\ select {\n        \\\\   case a := &lt;-rx1:\n        \\\\     fmt.Println(\&quot;got\&quot;, a)\n        \\\\   case b := &lt;-rx2:\n        \\\\     fmt.Println(\&quot;got\&quot;, b)\n        \\\\ }\n    )\n}&quot;">use fmt
+            <pre data-example="&quot;use fmt\nuse time\n\nfn main() {\n    let (tx1, rx1) = Channel.new()\n    let (tx2, rx2) = Channel.new()\n\n    // dummy done channel\n    let (_, done) = Channel.new()\n\n    spawn (|| {\n        tx1.Send(\&quot;a\&quot;)\n    })()\n\n    spawn (|| {\n        loop {\n            select {\n                // in Go:\n                //   case tx2 &lt;- \&quot;b\&quot;:\n                tx2.Send(\&quot;b\&quot;) =&gt; {\n                    fmt.Println(\&quot;sending b\&quot;)\n                    time.Sleep(1 * time.Second)\n                }\n\n                let _ = done.Recv() =&gt; return\n            }\n        }\n    })()\n\n    select {\n        // in Go:\n        //   case a := &lt;- rx1:\n        let a = rx1.Recv() =&gt; {\n            fmt.Println(\&quot;got\&quot;, a)\n        },\n\n        let b = rx2.Recv() =&gt; {\n            fmt.Println(\&quot;got\&quot;, b)\n        },\n    }\n}&quot;">use fmt
 use time
 
 fn main() {
     let (tx1, rx1) = Channel.new()
     let (tx2, rx2) = Channel.new()
 
+    // dummy done channel
+    let (_, done) = Channel.new()
+
     spawn (|| {
         tx1.Send(&quot;a&quot;)
     })()
 
     spawn (|| {
-        time.Sleep(2 * time.Second)
-        tx2.Send(&quot;b&quot;)
+        loop {
+            select {
+                // in Go:
+                //   case tx2 &lt;- &quot;b&quot;:
+                tx2.Send(&quot;b&quot;) =&gt; {
+                    fmt.Println(&quot;sending b&quot;)
+                    time.Sleep(1 * time.Second)
+                }
+
+                let _ = done.Recv() =&gt; return
+            }
+        }
     })()
 
-    @rawgo (
-        \\ select {
-        \\   case a := &lt;-rx1:
-        \\     fmt.Println(&quot;got&quot;, a)
-        \\   case b := &lt;-rx2:
-        \\     fmt.Println(&quot;got&quot;, b)
-        \\ }
-    )
+    select {
+        // in Go:
+        //   case a := &lt;- rx1:
+        let a = rx1.Recv() =&gt; {
+            fmt.Println(&quot;got&quot;, a)
+        },
+
+        let b = rx2.Recv() =&gt; {
+            fmt.Println(&quot;got&quot;, b)
+        },
+    }
 }</pre>
           </article>
             </section>
